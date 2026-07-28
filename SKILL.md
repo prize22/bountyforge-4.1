@@ -254,6 +254,22 @@ In one message, spawn all applicable agents as parallel foreground Agent calls.
 | `semantic-taint-agent` | Static source→sink tracking, mass assignment, auth bypass | Source code available (Python/JS/TS/Go/Rust) |
 | `ghost-state-agent` | Race conditions, TOCTOU, single-packet attacks, concurrency | Financial ops, coupons, inventory, voting |
 | `zero-context-agent` | Novel WAF bypass generation, semantic payload mutation | WAF/CDN-protected targets |
+| `attack-surface-agent` | Hidden APIs, GraphQL, WebSockets, mobile APIs, admin routes, debug endpoints, staging envs | Start of any external target |
+| `js-intelligence-agent` | JS bundle analysis, source maps, undocumented endpoints, API schemas, hidden routes, feature flags | Any target serving JS bundles |
+| `permission-graph-agent` | User/role/permission/resource mapping, BOLA/IDOR via authorization graph | Multi-role / multi-tenant targets |
+| `invariant-violation-agent` | Business rule inference, ownership/balance/quota violations, illegal state transitions | Apps with workflows / financial logic |
+| `cross-service-flow-agent` | Data flow tracking across APIs, DBs, queues, workers, caches, microservices | Distributed / microservice architectures |
+| `dangerous-pattern-agent` | Insecure coding patterns, repeated anti-patterns, vulnerable design structures | Source code available |
+| `exploit-chain-agent` | Multi-step attack correlation, finding A→B→C chains from scattered findings | When 2+ findings exist |
+| `assumption-breaker-agent` | Ownership, sequencing, trust boundary, validation consistency testing | Any target with auth / access control |
+| `behavior-diff-agent` | Guest vs auth, role diffs, mobile vs web, feature flag diffs, API version diffs | Multi-platform / multi-role targets |
+| `patch-regression-agent` | Incomplete fixes, inconsistent remediation, recurring patterns via code reuse | Target with public security commits |
+| `hypothesis-generator-agent` | Attack hypothesis generation, evidence-based prioritization, agent dispatch | Always runs (meta-coordinator) |
+| `evidence-correlation-agent` | Multi-source correlation, confidence boosting, duplicate reduction | Always runs (post-processing) |
+| `payload-evolution-agent` | Adaptive payload generation, response-based learning, context-aware inputs | When standard payloads fail |
+| `emergent-behavior-agent` | Feature interaction analysis, unexpected state combinations, cross-component bugs | Complex apps with many features |
+| `hidden-capability-agent` | Undocumented endpoint prediction, naming convention inference, schema deduction | Any target with JS / GraphQL / OpenAPI |
+
 
 
 **Flexibility Rule:** If an agent encounters something interesting outside its domain, it should probe it immediately rather than ignore it. WAF bypass agent finds SQLi? Test it. Recon agent finds leaked creds? Validate them. Don't defer — confirm now.
@@ -519,6 +535,83 @@ These are not theoretical. Every chain below was reported, triaged, and paid.
 4. Execute on mainnet/testnet with exact parameters from simulation
 ```
 **Key detail:** Use `economic_fuzzer.py` to brute-force profitable economic attacks.
+
+
+
+### Chain 19: JS Intelligence → Hidden Endpoint → Auth Bypass → Admin Access
+**Source:** Generic pattern — JS bundles often contain admin routes and debug endpoints.
+```
+1. JS Intelligence Agent extracts all routes from webpack bundles + source maps
+2. Finds `/api/.internal/health`, `/admin/superuser`, `/debug/exec`
+3. Hidden Capability Agent predicts these exist based on naming conventions
+4. Attack Surface Agent confirms they respond (200) without auth headers
+5. Auth bypass confirmed → full admin access
+```
+
+### Chain 20: Permission Graph → Behavior Diff → BOLA → Mass PII Exfil
+**Source:** Multi-tenant SaaS platforms.
+```
+1. Permission Graph Agent maps all roles (guest, user, admin, superadmin)
+2. Behavior Diff Agent compares API responses across roles for same resource IDs
+3. Inconsistent authorization detected: admin endpoint leaks data to user role
+4. BOLA/IDOR confirmed → enumerate all resource IDs → mass data exfil
+```
+
+### Chain 21: Invariant Violation → Business Logic → Negative Balance → Theft
+**Source:** Financial / fintech applications.
+```
+1. Invariant Violation Agent learns: "balance must be >= 0 after any operation"
+2. Tests edge cases: concurrent withdrawal, negative transfer amount, precision truncation
+3. Finds state where balance becomes negative → attacker effectively "creates" money
+4. Scale: transfer negative amount to victim → victim balance decreases → attacker gains
+```
+
+### Chain 22: Cross-Service Flow → Second-Order → Queue Poisoning → RCE
+**Source:** Microservice architectures with message queues.
+```
+1. Cross-Service Flow Agent traces: Upload → S3 → SQS → Worker → ImageMagick
+2. Second-Order Agent tests payload in upload filename: `test.mvg` (ImageMagick RCE)
+3. Worker processes queue asynchronously → RCE on worker container
+4. Pivot from worker to internal network → full infrastructure compromise
+```
+
+### Chain 23: Dangerous Pattern → Semantic Taint → Mass Assignment → Privilege Esc
+**Source:** Rails/Django/Node apps with permissive ORM usage.
+```
+1. Dangerous Pattern Agent finds 3+ instances of `Model.create(req.body)`
+2. Semantic Taint Agent confirms no `allowed_fields` / `permit` filter on any path
+3. Add `role: "admin"` or `is_superuser: true` to registration request
+4. Mass assignment confirmed → new account has admin privileges
+```
+
+### Chain 24: Assumption Breaker → Patch Regression → Variant Exploit
+**Source:** Targets that recently patched a known vulnerability.
+```
+1. Assumption Breaker Agent tests: "Did the developer assume this fix covers ALL similar code?"
+2. Patch Regression Agent diffs the fix commit, extracts the anti-pattern
+3. Grep codebase for same pattern in different modules/controllers
+4. Finds unpatched variant → same exploit, fresh bug
+```
+
+### Chain 25: Emergent Behavior → Feature Interaction → Logic Flaw
+**Source:** Complex platforms with many independent features.
+```
+1. Emergent Behavior Agent analyzes: Coupon system + Referral system + Refund system
+2. Finds interaction: apply coupon → get referral credit → refund order → coupon NOT revoked
+3. Attacker cycles: buy with coupon → refund → keep referral credit → repeat
+4. Infinite credit generation / money laundering loop
+```
+
+### Chain 26: Hidden Capability → Hypothesis Generator → Exploit Chain → Critical
+**Source:** AI-assisted discovery of undocumented functionality.
+```
+1. Hidden Capability Agent predicts undocumented endpoints from JS naming patterns
+2. Hypothesis Generator Agent creates test plan: "If /api/v1/users exists, /api/v1/admins likely exists"
+3. Attack Surface Agent confirms endpoint exists
+4. Behavior Diff Agent shows it responds differently to admin tokens
+5. Exploit Chain Agent combines with leaked admin JWT from Credential Leak Agent
+6. Full admin takeover → CRITICAL
+```
 
 
 ## TOP 1% HACKER MINDSET
@@ -1841,6 +1934,139 @@ Patterns extracted from 100 highest-upvoted HackerOne reports. Use for target se
 
 ---
 
+
+---
+
+# INTELLIGENCE AGENT WORKFLOW (v5.1 Intelligence Layer)
+
+The 15 Intelligence Agents do not replace the 15 Vulnerability Agents — they **feed** them. Intelligence agents discover, map, correlate, and hypothesize. Vulnerability agents exploit, validate, and prove.
+
+## The Intelligence Pipeline
+
+```
+Attack Surface Intelligence Agent
+        ↓
+JavaScript Intelligence Agent
+        ↓
+Hidden Capability Agent
+        ↓
+Hypothesis Generator Agent
+        ↓
+Permission Graph Agent
+        ↓
+Behavior Diff Agent
+        ↓
+Invariant Violation Agent
+        ↓
+Cross-Service Data Flow Agent
+        ↓
+Dangerous Pattern Mining Agent
+        ↓
+Assumption Breaker Agent
+        ↓
+Payload Evolution Agent
+        ↓
+Evidence Correlation Agent
+        ↓
+Exploit Chain Agent
+        ↓
+Patch Regression Agent
+```
+
+All intelligence is continuously shared with vulnerability agents to improve identification quality.
+
+## Agent Interactions
+
+| Intelligence Agent | Feeds These Vulnerability Agents |
+|---|---|
+| Attack Surface | Recon, Web/API |
+| JavaScript Intelligence | Attack Surface, Web/API, Business Logic, Shadow Logic |
+| Permission Graph | Access Control, Business Logic |
+| Invariant Violation | Business Logic, Shadow Logic |
+| Cross-Service Flow | Second-Order, Semantic Taint |
+| Dangerous Pattern | Patch-Gap, Semantic Taint |
+| Exploit Chain | All agents (correlates their findings) |
+| Assumption Breaker | Business Logic, Access Control |
+| Behavior Diff | Access Control, Business Logic, Shadow Logic |
+| Patch Regression | Patch-Gap |
+| Hypothesis Generator | All agents (dispatches tests) |
+| Evidence Correlation | All agents (post-processing) |
+| Payload Evolution | Zero-Context, Web/API |
+| Emergent Behavior | Business Logic, Exploit Chain |
+| Hidden Capability | Attack Surface, JavaScript Intelligence |
+
+## Turn 3 — Updated Agent Spawning (v5.1)
+
+In one message, spawn ALL applicable agents as parallel foreground Agent calls:
+
+**Phase A: Intelligence (always spawn first)**
+- `attack-surface-agent` — any external target
+- `js-intelligence-agent` — any target serving JS
+- `hidden-capability-agent` — any target with JS/GraphQL/OpenAPI
+- `hypothesis-generator-agent` — always
+
+**Phase B: Mapping (spawn based on target architecture)**
+- `permission-graph-agent` — multi-role / multi-tenant
+- `behavior-diff-agent` — multi-platform / multi-role
+- `cross-service-flow-agent` — microservices / distributed
+- `invariant-violation-agent` — workflow / financial logic
+
+**Phase C: Analysis (spawn based on available data)**
+- `dangerous-pattern-agent` — source code available
+- `patch-regression-agent` — public repo with security commits
+- `assumption-breaker-agent` — any target with auth
+
+**Phase D: Vulnerability (existing + S-Class agents)**
+- All 15 Vulnerability Agents (original 8 + S-Class 7)
+
+**Phase E: Correlation (always spawn last)**
+- `evidence-correlation-agent` — always
+- `exploit-chain-agent` — when findings exist
+- `payload-evolution-agent` — when standard payloads fail
+- `emergent-behavior-agent` — complex apps with many features
+
+## Intelligence → Action Mapping
+
+```yaml
+when:
+  attack_surface.finds_hidden_api:
+    spawn: [web-api-agent, access-control-agent]
+    priority: 1
+
+  js_intelligence.finds_admin_route:
+    spawn: [attack-surface-agent, access-control-agent]
+    test: [auth_bypass, idor, debug_endpoint]
+
+  permission_graph.finds_inconsistent_auth:
+    spawn: [access-control-agent, behavior-diff-agent]
+    test: [bola, privilege_escalation, horizontal_idor]
+
+  invariant_violation.finds_negative_balance:
+    spawn: [business-logic-agent, ghost-state-agent]
+    test: [race_condition, double_spend, precision_error]
+
+  cross_service_flow.finds_async_processing:
+    spawn: [second-order-agent, ghost-state-agent]
+    test: [queue_poisoning, stored_xss, ssrf_via_worker]
+
+  dangerous_pattern.finds_repeated_anti_pattern:
+    spawn: [semantic-taint-agent, patch-gap-agent]
+    test: [mass_assignment, sql_injection, rce]
+
+  hypothesis_generator.creates_high_ev_hypothesis:
+    spawn: [appropriate_vulnerability_agent]
+    execute: immediate_poc
+
+  evidence_correlation.finds_multi_source_match:
+    confidence_boost: +25
+    severity_escalation: consider
+
+  exploit_chain.finds_viable_chain:
+    report_as: single_finding
+    severity: max(component_severities) + 1
+```
+
+
 # S-CLASS MODULES (v5.1 Hidden-Bug & Autonomous Detection)
 
 These modules upgrade BountyForge from a static knowledge base to an autonomous, self-evolving hunting organism. Each module targets bug classes that checklist-based approaches miss.
@@ -3117,6 +3343,23 @@ After Turn 4, if `--autonomous` flag is set:
 | `--economic-fuzz` | DeFi/smart contract | Simulate flash loans, sandwich attacks |
 | `--autonomous` | Any full audit | Enable Turn 5 feedback loop |
 | `--all-modules` | "full audit" or no specific mode | Enable ALL S-Class modules |
+| `--intelligence` | Enable all 15 Intelligence Agents |
+| `--attack-surface` | Deep attack surface mapping |
+| `--js-intel` | JavaScript bundle intelligence extraction |
+| `--permission-graph` | Build authorization graph |
+| `--invariant` | Business rule inference and violation detection |
+| `--cross-service` | Microservice data flow tracking |
+| `--dangerous-pattern` | Code anti-pattern mining |
+| `--exploit-chain` | Automatic chain correlation |
+| `--assumption-breaker` | Developer assumption testing |
+| `--behavior-diff` | Cross-role/cross-platform behavior comparison |
+| `--patch-regression` | Incomplete fix detection |
+| `--hypothesis` | AI hypothesis generation |
+| `--evidence-correlation` | Multi-source finding correlation |
+| `--payload-evolution` | Adaptive payload learning |
+| `--emergent-behavior` | Feature interaction analysis |
+| `--hidden-capability` | Undocumented functionality prediction |
+
 
 ---
 

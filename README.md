@@ -7,7 +7,7 @@
 
 ## What It Does
 
-Bounty Forge spins up **8 specialized security agents in parallel**, each attacking a different surface of your target. Findings are deduplicated, gate-evaluated, CVSS-scored, and formatted into a submission-ready report — in minutes.
+Bounty Forge spins up **8 specialized security agents + 7 S-Class modules + 15 Intelligence agents in parallel (30 total)**, each attacking a different surface of your target. Findings are deduplicated, gate-evaluated, CVSS-scored, and formatted into a submission-ready report — in minutes.
 
 | Agent | Covers |
 |---|---|
@@ -19,12 +19,34 @@ Bounty Forge spins up **8 specialized security agents in parallel**, each attack
 | Race Conditions | Front-running, sandwich, TOCTOU, rotation window races |
 | Economic Security | Flash loans, oracle manipulation, inflation attacks, DeFi tokenomics |
 | Recon | Subdomain takeover, secret leaks, cloud misconfig, chain explorer recon |
+| Shadow Logic | Business logic flaws, state machine violations, semantic anomalies |
+| Patch-Gap | Incomplete patches, variant vulnerabilities, "else branch" bugs |
+| Second-Order | Stored→reflected vulns, temporal bugs, queue/cache poisoning |
+| Weirdness | Statistical anomalies, hidden endpoints, timing side-channels |
+| Semantic Taint | Static source→sink tracking, mass assignment, auth bypass |
+| Ghost State | Race conditions, TOCTOU, single-packet attacks, concurrency |
+| Zero-Context | Novel WAF bypass generation, semantic payload mutation |
+| Attack Surface Intelligence | Hidden APIs, GraphQL, WebSockets, mobile APIs, admin routes, debug endpoints, staging envs |
+| JavaScript Intelligence | JS bundle analysis, source maps, undocumented endpoints, API schemas, feature flags |
+| Permission Graph | User/role/permission/resource mapping, BOLA/IDOR via authorization graph |
+| Invariant Violation | Business rule inference, ownership/balance/quota violations, illegal state transitions |
+| Cross-Service Data Flow | Data flow tracking across APIs, DBs, queues, workers, caches, microservices |
+| Dangerous Pattern Mining | Insecure coding patterns, repeated anti-patterns, vulnerable design structures |
+| Exploit Chain | Multi-step attack correlation, A→B→C chain building from scattered findings |
+| Assumption Breaker | Ownership, sequencing, trust boundary, validation consistency testing |
+| Behavior Diff | Guest vs auth, role diffs, mobile vs web, feature flag diffs, API version diffs |
+| Patch Regression | Incomplete fixes, inconsistent remediation, recurring patterns via code reuse |
+| Hypothesis Generator | Attack hypothesis generation, evidence-based prioritization, agent dispatch |
+| Evidence Correlation | Multi-source correlation, confidence boosting, duplicate reduction |
+| Payload Evolution | Adaptive payload generation, response-based learning, context-aware inputs |
+| Emergent Behavior | Feature interaction analysis, unexpected state combinations, cross-component bugs |
+| Hidden Capability | Undocumented endpoint prediction, naming convention inference, schema deduction |
 
-**Supported targets:** web/API, smart contracts, infrastructure, supply chain, internal tooling, binary analysis
+**Supported targets:** web/API, smart contracts, infrastructure, supply chain, internal tooling, binary analysis, AI/LLM features, CI/CD pipelines
 
 **Local tooling:** When Claude Code execution is enabled, BountyForge can orchestrate local CLI tools like `nmap`, `ffuf`, `amass`, `sqlmap`, `gobuster`, `curl`, `httpx`, `wfuzz`, `zap`, `burpsuite`, and other installed scanners/fuzzers.
 
-**Payload coverage:** Designed to explore unlimited payload variants for SQL injection, CSV injection, open redirect, XSS, SSRF, command injection, template injection, path traversal, deserialization, prototype pollution, auth bypass, business logic abuse, IDOR, CSRF, response splitting, and more.
+**Payload coverage:** Designed to explore unlimited payload variants for SQL injection, CSV injection, open redirect, XSS, SSRF, command injection, template injection, path traversal, deserialization, prototype pollution, auth bypass, business logic abuse, IDOR, CSRF, response splitting, cache poisoning, HTTP smuggling, GraphQL abuse, LLM prompt injection, and more.
 
 **Reference setup files:** `references/setup.md` and `references/local-tooling.md` contain the actual Deepseek CLI, local tooling, and vulnerability environment instructions the skill uses.
 
@@ -181,6 +203,32 @@ generate immunefi report --cvss: [describe the vuln]
 | `--cvss` | Include full CVSS 3.1 vector string + justification |
 | `--file-output` | Save report to `bountyforge-report-[timestamp].md` |
 | `--full` | Run all 8 agents regardless of detected file type |
+| `--shadow-logic` | Enable behavioral baseline + anomaly detection |
+| `--patch-gap` | Ingest recent security commits, hunt unpatched variants |
+| `--second-order` | Map storage→consumption flows for temporal bugs |
+| `--weirdness` | Build endpoint baseline, find statistical outliers |
+| `--semantic-taint` | Run static source→sink analysis on available code |
+| `--ghost-state` | Single-packet race + timing side-channel analysis |
+| `--zero-context` | Generate novel WAF bypass payloads on-the-fly |
+| `--economic-fuzz` | Simulate flash loans, sandwich attacks, oracle manipulation |
+| `--autonomous` | Enable Turn 5 feedback loop for self-evolving hunts |
+| `--all-modules` | Enable ALL S-Class modules regardless of target |
+| `--intelligence` | Enable all 15 Intelligence Agents |
+| `--attack-surface` | Deep attack surface mapping |
+| `--js-intel` | JavaScript bundle intelligence extraction |
+| `--permission-graph` | Build authorization graph |
+| `--invariant` | Business rule inference and violation detection |
+| `--cross-service` | Microservice data flow tracking |
+| `--dangerous-pattern` | Code anti-pattern mining |
+| `--exploit-chain` | Automatic chain correlation |
+| `--assumption-breaker` | Developer assumption testing |
+| `--behavior-diff` | Cross-role/cross-platform behavior comparison |
+| `--patch-regression` | Incomplete fix detection |
+| `--hypothesis` | AI hypothesis generation |
+| `--evidence-correlation` | Multi-source finding correlation |
+| `--payload-evolution` | Adaptive payload learning |
+| `--emergent-behavior` | Feature interaction analysis |
+| `--hidden-capability` | Undocumented functionality prediction |
 
 ---
 
@@ -191,7 +239,7 @@ Discover files / scope
         ↓
 Build agent bundles (source + agent instructions)
         ↓
-Spawn 8 agents in parallel
+Spawn 8 agents + S-Class modules + Intelligence agents in parallel
         ↓
 Deduplicate findings by (Target | location | bug-class)
         ↓
@@ -200,7 +248,11 @@ Gate evaluation: Refutation → Reachability → Trigger → Impact
 CVSS 3.1 scoring
         ↓
 Submission-ready report
+        ↓
+[--autonomous] Feedback Oracle → New hypotheses → Re-rank → Re-execute
 ```
+
+With `--autonomous`, BountyForge enters a self-evolving loop after the initial report: the Feedback Oracle ingests every finding, generates new attack hypotheses from anomalies and taint flows, ranks them by Expected Value `(probability × impact) / effort`, and executes the top hypothesis automatically until no high-EV targets remain.
 
 Every finding passes four gates before it's confirmed:
 
@@ -210,6 +262,119 @@ Every finding passes four gates before it's confirmed:
 4. **Impact** — is there material harm to an identifiable victim?
 
 Fail any gate → rejected or demoted to a lead for manual review.
+
+
+---
+
+## S-Class Modules (v5.1)
+
+BountyForge 5.1 adds **9 autonomous Python modules** that detect bug classes checklist-based approaches miss. These modules run as embedded agents or standalone tools.
+
+| Module | What It Finds |
+|---|---|
+| `shadow_logic.py` | Price manipulation, workflow bypass, state machine violations, mass assignment |
+| `patch_gap.py` | Incomplete fixes, variant vulnerabilities, "else branch" bugs left after patches |
+| `second_order_detector.py` | Stored XSS via admin dashboards, SQLi via analytics, SSRF via thumbnail services |
+| `weirdness_scorer.py` | Hidden debug endpoints, timing side-channels, unauthorized mutation acceptance |
+| `semantic_taint.py` | Mass assignment, auth bypass, SQLi, RCE, SSTI via static source→sink tracking |
+| `economic_fuzzer.py` | Flash loan attacks, sandwich exploits, oracle manipulation, MEV extraction |
+| `zero_context_mutator.py` | Novel WAF bypasses, context-specific XSS, JSON/prototype pollution |
+| `ghost_state_hunter.py` | Double-spend, coupon reuse, inventory overselling, TOCTOU race conditions |
+| `feedback_oracle.py` | Closed-loop learning — every success/failure updates future hypotheses |
+
+### How S-Class modules integrate
+
+- **Turn 3** — Spawn standard agents + S-Class agents based on target triggers
+- **Turn 5** — Autonomous feedback loop (when `--autonomous` is set): ingest findings, generate new hypotheses, rank by Expected Value, execute top hypothesis, repeat
+- **Feedback Oracle** — Learns from every PoC: failures suggest alternatives, successes spawn sibling tests, duplicates improve dedup rules
+
+### New A→B Chains (v5.1)
+
+- **Chain 13** — Patch-Gap Variant → Same-class exploit (incomplete fixes)
+- **Chain 14** — Second-Order Stored → Admin Dashboard XSS → ATO
+- **Chain 15** — Semantic Taint → Mass Assignment → IDOR → Data Exfil
+- **Chain 16** — Race Condition → Double-Spend → Financial Loss
+- **Chain 17** — Behavioral Anomaly → Hidden Endpoint → Debug Feature → RCE
+- **Chain 18** — Economic Fuzzing → Flash Loan Manipulation → Protocol Insolvency
+
+
+---
+
+## Intelligence Agents (v5.1)
+
+BountyForge 5.1 adds **15 Intelligence Agents** that do not replace the 15 Vulnerability Agents — they **feed** them. Intelligence agents discover, map, correlate, and hypothesize. Vulnerability agents exploit, validate, and prove.
+
+### The Intelligence Pipeline
+
+```
+Attack Surface Intelligence
+        ↓
+JavaScript Intelligence
+        ↓
+Hidden Capability
+        ↓
+Hypothesis Generator
+        ↓
+Permission Graph
+        ↓
+Behavior Diff
+        ↓
+Invariant Violation
+        ↓
+Cross-Service Data Flow
+        ↓
+Dangerous Pattern Mining
+        ↓
+Assumption Breaker
+        ↓
+Payload Evolution
+        ↓
+Evidence Correlation
+        ↓
+Exploit Chain
+        ↓
+Patch Regression
+```
+
+### What Each Intelligence Agent Does
+
+| Agent | Purpose |
+|---|---|
+| **Attack Surface Intelligence** | Discovers hidden APIs, GraphQL endpoints, WebSockets, mobile APIs, admin routes, debug endpoints, feature-flagged functionality, and staging environments. Correlates assets across DNS, JS, API responses, and infrastructure. |
+| **JavaScript Intelligence** | Analyzes JS bundles and source maps to recover undocumented endpoints, API schemas, GraphQL operations, hidden routes, feature flags, object models, and client-side authorization logic. |
+| **Permission Graph** | Models application authorization by building relationships between users, roles, permissions, ownership, and resources. Identifies inconsistent auth checks and BOLA/IDOR opportunities through permission mapping. |
+| **Invariant Violation** | Infers expected business rules (ownership, balances, workflow rules, quotas, state transitions) and detects operations that violate them. |
+| **Cross-Service Data Flow** | Tracks attacker-controlled data across APIs, databases, queues, workers, caches, and microservices. Identifies second-order processing paths. |
+| **Dangerous Pattern Mining** | Detects insecure coding patterns and repeated anti-patterns across similar code paths, even when no public CVE exists. |
+| **Exploit Chain** | Correlates multiple low- or medium-severity findings into realistic multi-step attack paths with combined impact. |
+| **Assumption Breaker** | Tests developer assumptions: ownership, sequencing, trust boundaries, and validation consistency across related functionality. |
+| **Behavior Diff** | Compares application behavior under different conditions (guest vs auth, roles, mobile vs web, feature flags, API versions, locales) to find inconsistent authorization or logic. |
+| **Patch Regression** | Compares patched functionality with similar code paths to detect incomplete fixes and recurring vulnerable patterns from code reuse. |
+| **Hypothesis Generator** | Generates attack hypotheses from observed behavior, infers likely vulnerability locations, and prioritizes testing based on evidence rather than signatures. Dispatches relevant agents to validate. |
+| **Evidence Correlation** | Combines HTTP responses, JavaScript, infrastructure, API schemas, headers, feature flags, and runtime observations into high-confidence findings. Reduces duplicates. |
+| **Payload Evolution** | Adapts payloads according to application behavior. Learns successful request variations and generates context-aware inputs. |
+| **Emergent Behavior** | Analyzes feature interactions to detect vulnerabilities that only appear when multiple independent components work together. |
+| **Hidden Capability** | Predicts undocumented functionality from JavaScript, naming conventions, feature flags, GraphQL schemas, OpenAPI artifacts, and API behavior. |
+
+### Intelligence → V Agent Mapping
+
+| Intelligence Agent | Feeds |
+|---|---|
+| Attack Surface | Recon, Web/API |
+| JavaScript Intelligence | Attack Surface, Web/API, Business Logic, Shadow Logic |
+| Permission Graph | Access Control, Business Logic |
+| Invariant Violation | Business Logic, Shadow Logic |
+| Cross-Service Flow | Second-Order, Semantic Taint |
+| Dangerous Pattern | Patch-Gap, Semantic Taint |
+| Exploit Chain | All agents (correlates findings) |
+| Assumption Breaker | Business Logic, Access Control |
+| Behavior Diff | Access Control, Business Logic, Shadow Logic |
+| Patch Regression | Patch-Gap |
+| Hypothesis Generator | All agents (dispatches tests) |
+| Evidence Correlation | All agents (post-processing) |
+| Payload Evolution | Zero-Context, Web/API |
+| Emergent Behavior | Business Logic, Exploit Chain |
+| Hidden Capability | Attack Surface, JavaScript Intelligence |
 
 ---
 
@@ -239,6 +404,16 @@ BountyForge checks for updates automatically on each run and will warn you if a 
 bountyforge/
 ├── SKILL.md                          # Main orchestrator
 ├── VERSION                           # Current version
+├── tools/                            # S-Class Python modules
+│   ├── shadow_logic.py
+│   ├── patch_gap.py
+│   ├── second_order_detector.py
+│   ├── weirdness_scorer.py
+│   ├── semantic_taint.py
+│   ├── economic_fuzzer.py
+│   ├── zero_context_mutator.py
+│   ├── ghost_state_hunter.py
+│   └── feedback_oracle.py
 └── references/
     ├── judging.md                    # 4-gate evaluation rules
     ├── report-formatting.md          # Platform report templates
@@ -258,7 +433,29 @@ bountyforge/
         ├── crypto-math-agent.md
         ├── race-condition-agent.md
         ├── economic-security-agent.md
-        └── recon-agent.md
+        ├── recon-agent.md
+        ├── shadow-logic-agent.md
+        ├── patch-gap-agent.md
+        ├── second-order-agent.md
+        ├── weirdness-agent.md
+        ├── semantic-taint-agent.md
+        ├── ghost-state-agent.md
+        ├── zero-context-agent.md
+        ├── attack-surface-agent.md
+        ├── js-intelligence-agent.md
+        ├── permission-graph-agent.md
+        ├── invariant-violation-agent.md
+        ├── cross-service-flow-agent.md
+        ├── dangerous-pattern-agent.md
+        ├── exploit-chain-agent.md
+        ├── assumption-breaker-agent.md
+        ├── behavior-diff-agent.md
+        ├── patch-regression-agent.md
+        ├── hypothesis-generator-agent.md
+        ├── evidence-correlation-agent.md
+        ├── payload-evolution-agent.md
+        ├── emergent-behavior-agent.md
+        └── hidden-capability-agent.md
 ```
 
 ---
