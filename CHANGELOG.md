@@ -1,0 +1,367 @@
+# Changelog
+
+## Merged v4.1.0 + v5.1 (2026-09-17)
+
+### Merged from prize22/bountyforge-4.1 fork
+- **S-Class Modules integrated:** Shadow Logic, Patch-Gap Vampire, Second-Order Ghost Detector, Weirdness Scorer, Semantic Taint Tracker (9 total modules from fork, 5 activated)
+- **Intelligence Agent Workflow** — 15 intelligence agents added to Turn 3 agent spawning pipeline
+- **A→B Bug Chains** — 26 proven chain patterns integrated from fork
+- **S-Class Orchestration Addendum** — Updated agent selection, Turn 5 autonomous loop, new mode flags
+- **Intelligence → Action Mapping** — YAML-based agent spawning triggers and correlations
+- **S-Class Safe Patterns** — Added anti-dismissal patterns for each module type
+- **CONTEXT BUDGET** — Load-on-demand references preserved from upstream v4.1.0
+- **Reference Map** — Expanded with 21 reference files (from upstream v4.1.0)
+- **17 Bundled Skills** — Self-contained distribution preserved from upstream
+- **External Skill Packs** — pentest-skills integration preserved from upstream
+
+### Added S-Class Module Triggers
+- `--shadow-logic`, `--patch-gap`, `--second-order`, `--weirdness`, `--semantic-taint`, `--ghost-state`, `--zero-context`, `--economic-fuzz`, `--autonomous`, `--all-modules`, `--intelligence`
+
+### Added Mode Flags
+| Flag | Trigger | Action |
+|------|---------|--------|
+| `--shadow-logic` | Any web target | Enable behavioral baseline + anomaly detection |
+| `--patch-gap` | Public repo available | Ingest recent security commits, hunt variants |
+| `--second-order` | UGC / async target | Map storage→consumption flows |
+| `--weirdness` | API target | Build endpoint baseline, find statistical outliers |
+| `--semantic-taint` | Source code available | Run static source→sink analysis |
+| `--ghost-state` | Financial/logic flows | Single-packet race + timing analysis |
+| `--zero-context` | WAF present | Generate novel bypass payloads |
+| `--economic-fuzz` | DeFi/smart contract | Simulate flash loans, sandwich attacks |
+| `--autonomous` | Any full audit | Enable Turn 5 feedback loop |
+| `--all-modules` | "full audit" or no specific mode | Enable ALL S-Class modules |
+| `--intelligence` | Enable all 15 Intelligence Agents |
+| `--attack-surface` | Deep attack surface mapping |
+| `--js-intel` | JavaScript bundle intelligence extraction |
+| `--permission-graph` | Build authorization graph |
+| `--invariant` | Business rule inference and violation detection |
+| `--cross-service` | Microservice data flow tracking |
+| `--dangerous-pattern` | Code anti-pattern mining |
+| `--exploit-chain` | Automatic chain correlation |
+| `--assumption-breaker` | Developer assumption testing |
+| `--behavior-diff` | Cross-role/cross-platform behavior comparison |
+| `--patch-regression` | Incomplete fix detection |
+| `--hypothesis` | AI hypothesis generation |
+| `--evidence-correlation` | Multi-source finding correlation |
+| `--payload-evolution` | Adaptive payload learning |
+| `--emergent-behavior` | Feature interaction analysis |
+| `--hidden-capability` | Undocumented functionality prediction |
+
+### Added Intelligence Agent Mapping
+```yaml
+when:
+  attack_surface.finds_hidden_api:
+    spawn: [web-api-agent, access-control-agent]
+    priority: 1
+
+  js_intelligence.finds_admin_route:
+    spawn: [attack-surface-agent, access-control-agent]
+    test: [auth_bypass, idor, debug_endpoint]
+
+  permission_graph.finds_inconsistent_auth:
+    spawn: [access-control-agent, behavior-diff-agent]
+    test: [bola, privilege_escalation, horizontal_idor]
+
+  invariant_violation.finds_negative_balance:
+    spawn: [business-logic-agent, ghost-state-agent]
+    test: [race_condition, double_spend, precision_error]
+
+  cross_service_flow.finds_async_processing:
+    spawn: [second-order-agent, ghost-state-agent]
+    test: [queue_poisoning, stored_xss, ssrf_via_worker]
+
+  dangerous_pattern.finds_repeated_anti_pattern:
+    spawn: [semantic-taint-agent, patch-gap-agent]
+    test: [mass_assignment, sql_injection, rce]
+
+  hypothesis_generator.creates_high_ev_hypothesis:
+    spawn: [appropriate_vulnerability_agent]
+    execute: immediate_poc
+
+  evidence_correlation.finds_multi_source_match:
+    confidence_boost: +25
+    severity_escalation: consider
+
+  exploit_chain.finds_viable_chain:
+    report_as: single_finding
+    severity: max(component_severities) + 1
+```
+
+## v4.1.0 (2026-09-16)
+
+(unchanged from original - see upstream Gabson0x/bountyforge)
+
+### Changed
+- **SKILL.md slimmed 3.4×** (2,992 → 872 lines, 162KB → 65KB). Doctrine, mode selection, skill chain, orchestration, and hot-path sections stay; deep checklists moved to `references/` and load on demand.
+- **Banner + AUTO-UPDATE SYSTEM retained** — v4.0.0 session-start behavior is unchanged.
+- **Frontmatter description trimmed** (~230 words → 2 sentences). The description is resident in the system prompt every session; trigger coverage is retained.
+- Turn 2 bundle build is now the only place that mandates loading everything; all other loading follows CONTEXT BUDGET rules.
+
+### Added
+- **CONTEXT BUDGET — Load On Demand** section: explicit rules for when references and sub-skills are read.
+- **REFERENCE MAP** table: topic/trigger → exact file to load.
+- **EXTERNAL SKILL PACKS** section: cross-reference to the optional `pentest-skills` pack (github.com/crazyMarky/pentest-skills, Apache-2.0) — `recon-subdomain`, `recon-port-scan`, `recon-fingerprint`, `recon-dir-scan`, `exploit-sqli`, `exploit-xss`, `exploit-lfi`, `exploit-file-download`, `pentest-report`, `results-storage`. Referenced by skill name (public-safe, no absolute paths); BountyForge gates and report format take precedence.
+- **9 new reference files** extracted verbatim from SKILL.md:
+  - `references/web3-quickstart.md` — multi-chain reading order + 3-tier grep arsenal
+  - `references/mode-modules.md` — godmod / fuzz / x-ray / meme / storage
+  - `references/ab-chains.md` — H100 proven A→B chains
+  - `references/recon-and-leaks.md` — Phase 1 recon + credential/source leaks
+  - `references/learn.md` — Phase 2 disclosed-report pipeline + threat model
+  - `references/web-hunting-playbooks.md` — all bug-class checklists
+  - `references/validation.md` — SC 5-layer reasoning, 7-Question Gate, triage tracks, CVSS
+  - `references/reporting.md` — report format, formulas, reject lists, target profiles
+  - `references/python-tooling.md` — `tools/` command reference
+
+### Fixed
+- Removed duplicated `skills/pashov/fizz` tree (byte-identical to `skills/fizz`; chain table already pointed at `skills/fizz`).
+
+### Stats
+- 2,297 lines relocated, 0 lines of content lost (verified by line-set diff against the old SKILL.md).
+- `bountyforge.skill` regenerated from the new SKILL.md.
+
+---
+
+## v4.0.0 (2026-09-13)
+
+### Added
+- **17 Skills Bundled** (`skills/`): All external skills copied into repo for self-contained distribution. Includes bb-methodology, bug-bounty, code-sleuth, fizz, godmod, hackenproof-triage-marketplace, meme-coin-audit, pashov (solidity-auditor, x-ray, fizz, fizz-sync, fizz-convert), report-writing, security-arsenal, smart-contract-audit, triage-validation, web2-recon, web2-vuln-classes, web3 (11 sub-skills), web3-audit.
+- **SKILL CHAIN Reference Table** (`SKILL.md`): Local path references with trigger conditions for all 17 bundled skills.
+- **9 New Modes** (`SKILL.md`): `--web3`, `--fuzz`, `--multi-chain`, `--xray`, `--solidity-audit`, `--meme`, `--storage`, `--hackenproof`, `--expert`.
+- **Multi-Chain Support** (`SKILL.md`): 7 blockchain platforms (EVM, Solana, TON, Sui, Cosmos, Near, Cardano) with three-layer reading order and protocol-specific audit tricks.
+- **Web3 Grep Arsenal** (`SKILL.md`): 3-tier copy-paste grep blocks for first 30 minutes of any new Solidity target.
+- **10 Attacker Questions** (`SKILL.md`): For every external smart contract function.
+- **Godmod Expert Mode** (`SKILL.md`): 4 simultaneous personas (Security Researcher, Pentester, Senior Dev, Cracked Generalist).
+- **Fuzz Suite Generation** (`SKILL.md`): 11-step pipeline with 5 specialized invariant discovery agents (Echidna/Medusa).
+- **X-Ray Pre-Audit Report** (`SKILL.md`): Enhanced threat model with git-weighted attack surfaces, composability dependency mapping.
+- **Meme Coin / Token Security Audit** (`SKILL.md`): 8 token-specific bug classes, Solana SPL checks, Token-2022 extension risks, bonding curve manipulation.
+- **EVM Storage-Safety Analysis** (`SKILL.md`): Lost writes, proxy collisions, attacker-influenced storage slots, upgrade layout hazards.
+- **HackenProof Triage Workflow** (`SKILL.md`): Mandatory tool sequence, 4 pre-validation gates, decision states.
+- **Immunefi Web3 Triage** (`SKILL.md`): 20 real paid bounty patterns dissected, Immunefi report format requirements.
+- **MFA Bypass** (`SKILL.md`): 7 patterns with testing checklist.
+- **SAML Attacks** (`SKILL.md`): XML Signature Wrapping, comment injection, signature stripping.
+- **XXE, Deserialization, Host Header Injection, Custom Header Injection, WebSocket Attacks** (`SKILL.md`): Complete detection payloads and testing checklists.
+- **Agentic AI Attack Vectors** (`SKILL.md`): ASI01-ASI10 in practice (chatbot IDOR, prompt injection, indirect injection, ASCII smuggling, exfil channels, RCE via code tools).
+- **Release Notes** (`RELEASE.md`): Structured release notes for v4.0.0.
+
+### Changed
+- Orchestration Turn 2 updated to load skills from local `skills/` directory.
+- VERSION bumped from 3.3.5 to 4.0.0.
+
+---
+
+## v3.4.1 (2026-08-17)
+
+### Added
+- **Adversarial Refutation Engine Upgrade** (`tools/refutation.py`): Automated refutation engine now evaluates findings against the 10 Red Team Attack Questions and enforces `Demonstrated` vs `Inferred` classification before clearing findings.
+- **Exploit Generator Upgrade** (`tools/exploit_gen.py`): Python PoC script generator now embeds an automated **Absent Credential Evidence Grid** audit function (`verify_absent_credentials`) that verifies `Authorization` headers, bearer tokens, cookies, and environment variables before payload execution.
+- **Program Fit Multi-Context Support** (`tools/program_fit.py`): Added `EngagementContext` enum supporting `BUG_BOUNTY_PLATFORM`, `DIRECT_VENDOR_DISCLOSURE`, and `INTERNAL_RED_TEAM` modes.
+- **Persistent Lead Ledger Tripwires** (`tools/leads.py`): Added `re_trigger_conditions[]` field to `Lead` dataclass for tracking tripwire observables on killed and parked leads.
+- **New Reference Attack Vectors** (`references/attack-vectors/`):
+  - **Cloud Sandbox & Micro-Hypervisor Vectors** (`cloud-sandbox-vectors.md`): Unauthenticated guest daemons (h2c/gRPC), VSock protocol desync (`AF_VSOCK`), Firecracker MMDS metadata exploitation, WASM linear memory bounds bypass, and raw block forensics (`/dev/vda`).
+  - **Agentic AI & MCP Server Vectors** (`agentic-ai-vectors.md`): MCP tool parameter smuggling, multi-agent context poisoning & handoff hijacking, indirect prompt injection via documentation, and excessive agency bounds bypass.
+
+---
+
+### Added
+- **5-Step Methodology Spine** (`references/supervisor.md`, `SKILL.md`): Core triage and evaluation sequence grounded in `Program Policy → Scope → Security Boundary → Demonstrated Impact → Severity`.
+- **Red Team Adversarial Triage Engine** (`references/supervisor.md`, `SKILL.md`): Before report generation, BountyForge attacks its own finding across 10 Red Team Attack Questions (Scope, Policy, Precondition, Authentication, Path A, Path B, Boundary, Impact, Alternative explanation, Evidence). Findings that cannot survive the strongest plausible triager rebuttal are blocked from promotion to a report.
+- **Demonstrated vs. Inferred vs. Unproven Classification** (`references/supervisor.md`, `references/report-formatting.md`, `SKILL.md`): Enforces explicit status tagging (`Demonstrated`, `Inferred`, `Unproven`) on every technical claim to prevent report drift from demonstrated primitives (e.g. unauthenticated guest execution) into unproven speculation (e.g. host escape).
+- **Scope & Engagement Gate** (`references/supervisor.md`, `references/report-formatting.md`, `SKILL.md`): Replaces static platform assumptions with multi-context engagement scope derivation supporting Bug Bounty Platforms (BBP/VDP), Direct Vendor Private Disclosures, and Internal Red Team / Pentests.
+- **Defensive-Proof Report Formatting** (`references/report-formatting.md`, `SKILL.md` Phase 5):
+  - **Path A vs Path B Comparison**: Contrasts legitimate intended flow vs unauthorized flow demonstrated.
+  - **Absent Credential Evidence Grid**: Explicit markdown grid proving absence of Authorization headers, Bearer tokens, cookies, session files, mTLS, or capability tokens.
+  - **Demonstrated vs Inferred Audit Matrix**: Embedded status table in reports proving technical rigor.
+
+---
+
+## v3.3.3 (2026-08-20)
+
+### Added
+- **Platform-Hosted Product Hunting (PHP)** (`SKILL.md`): New target hunting module for cloud/VM/sandbox targets (Vercel, AWS, Firecracker, Fly.io, Modal) addressing 10 critical gaps from post-mortem analysis:
+  - **Phase 0 — Docs Extraction**: Extract endpoint list, documented behaviors, and documented limitations (bugs live in the limitations sections).
+  - **SDK-as-SPEC**: Grep npm/PyPI client packages (`node_modules/@vendor/package/dist/`) for full route maps, Zod/Joi validators, and internal API interfaces.
+  - **Local Lab Replication**: Extract open-source target components and perform local stateful fuzzing with ASan/MSan to reach complex handshake code paths.
+  - **Protocol-Level Testing**: Sniff wire traffic via `AF_PACKET` / `tcpdump` and test raw requests over SDK abstractions (h2c, HPACK, protobuf, END_STREAM flags).
+  - **Feature-Abuse SSRF**: Target product features executing network I/O with URL validator bypasses, cloud metadata probes, and DNS rebinding.
+  - **Raw-Device Forensics**: Scan raw block devices (`/dev/vda`, `/dev/sda`) inside guest containers/VMs for pooled image residue and host secrets.
+- **Scoping-Order Analysis** (`SKILL.md`, IDOR section): Probe validation ordering (`400` vs `404` vs `415` vs `403`) to identify existence oracles and pre-authz schema processing.
+- **Scope-Text Re-Derivation Gate** (`SKILL.md`, Operating Constraints): Mandatory keyword re-derivation against program scope before investing deep hours into candidate leads.
+- **Dismissed-Lead Ledger with Re-Trigger Conditions** (`SKILL.md`, Lead Ledger): Tripwire table mapping dead-end leads to specific observables that reopen them.
+- **Abandonment Discipline — When to Stop** (`SKILL.md`, Operating Constraints): Concrete 5-point kill criteria and negative-verdict deliverable requirements for engagement completion.
+
+---
+
+## v3.4.1 (2026-08-17)
+
+### Added
+- **THE TWO-QUESTION RULE — Trigger × Impact** (`SKILL.md`, new section after "THE ONLY QUESTION THAT MATTERS") — fixes the premature-kill failure mode where an agent answers the trigger question ("can the path fire?") and never traces the impact question ("if it fires, what does the victim lose?"):
+  - Every lead carries two INDEPENDENT questions; both get a written trace before any verdict. Answering one and assuming the other is a process error.
+  - **Impact is victim-harm, not attacker-profit.** "This doesn't make an attacker money" is NOT a kill — an accounting desync that strands or misdirects account value (permanently stuck, or recoverable only through a privileged path) is account-owner loss, a **Medium floor on Immunefi in its own right**. Attacker-profit chaining is a separate trace after impact, never a precondition.
+  - **Three verdicts only: FINDING / OPEN LEAD / KILL.** KILL requires BOTH refutations with evidence (path proven unreachable AND harm proven nonexistent). One unproven half = OPEN LEAD — logged with payload and chain partners, retested next pass. "Below the bar" is not a kill; severity estimation never precedes the impact trace.
+  - Kill table annotated: all rows are TRIGGER-refutations only; "trigger proven, impact untraced" row added → OPEN LEAD.
+- `references/wild-mode.md` Rule 8 "TWO QUESTIONS PER LEAD (TRIGGER × IMPACT)" — same doctrine in the always-loaded wild-mode reference.
+- `references/supervisor.md` Gate 1 "Trigger vs Impact — the two-halves rule" — KILL only after both halves resolved; untraced impact demotes to OPEN LEAD, not kill. Pipeline diagram now shows the OPEN LEAD state.
+
+### Fixed
+- No code changes; behavior-only doctrine fix for lead lifecycle management (kill → open lead demotion).
+
+---
+
+## v3.4.0 (2026-08-16)
+
+### Added
+- **Observation / Oracle Validation layer** (`tools/observation.py`) — a raw HTTP response can no longer automatically refute an experiment. Every active-injection probe is now validated against a control/baseline across status, body, headers, timing, redirects, and size before any refutation:
+  - **Deterministic rules own the final observation state** (`SIGNAL` / `REFUTED` / `UNKNOWN` / `ERROR`). The LLM may flag ambiguity, rank it, and request follow-ups (`attach_llm_note`), but its commentary is advisory-only and can never flip the verdict. All rule evaluations are preserved in an append-only reasoning chain, and the original raw observation is preserved verbatim in provenance with a tamper-evident record hash.
+  - **UNKNOWN beats REFUTED on ambiguity:** the timing rule fires before the control-match rule, so a 404 that matches the baseline in status/body but takes seconds vs milliseconds (time-based blind injection) is classified UNKNOWN and generates a deterministic follow-up experiment — never silently refuted. Status divergence to 404/403 from a healthy baseline (different execution path) and body divergence are likewise UNKNOWN, never refuted.
+  - **Follow-up experiment generation:** UNKNOWN observations carry a machine-checkable `FollowUpExperiment` spec (TIMING_CONTROL, STATUS_PROBE, BODY_DIFF_PROBE, REDIRECT_PROBE, GENERIC_RETRY) with request specs and acceptance criteria. `hunt.py` executes the follow-up deterministically and resolves the state.
+  - Persistence: append-only `state/observations/{target}.jsonl` with `ObservationRecord.from_dict/to_dict` round-trip and hash verification.
+- `tools/hunt.py` integration: `curl_fetch_observation()` captures full observables (status, headers, body, timing, size, redirect target); `run_active_injection()` routes every probe through the validator; ambiguous observations surface as `[unknown]` leads in the structured JSON (`observations` section, schema 2.3.0) and are never promoted to findings; `state/observations/` keeps every REFUTED/UNKNOWN record with provenance.
+- **Regression test suite** `tests/test_observation.py` (27 tests, stdlib `unittest`, `python3 -m unittest discover -s tests`), including the headline **404-with-significantly-different-timing** case (must be UNKNOWN with a TIMING_CONTROL follow-up, never REFUTED), the control-URL binding (follow-up control runs must target the payload-free baseline), LLM-cannot-override-state, provenance preservation, hash tamper-evidence, persistence, and probe URL encoding.
+
+### Fixed
+- `tools/hunt.py` CLI entry point restored — the `if __name__ == "__main__": main()` block was missing, so `python3 tools/hunt.py ...` silently exited 0.
+- Probe URLs with characters curl rejects (spaces in `SLEEP(0)`, `OR 1=1`, braces in SSTI, angle brackets in XSS) are now percent-encoded (`_encode_probe_url`) — these experiments previously never executed (curl rc=3 → silently skipped).
+
+---
+
+## v3.3.0 (2026-08-15)
+
+### Added
+- **Methodology spine — 5 Pillars, 6 Rules, 5 Questions** — new always-loaded `references/methodology.md` restructures the hunt from flat endpoint-spraying into an architecture-first loop:
+  - **5 Pillars (mandatory maps):** P1 Asset Map (`asset.md`), P2 Trust Map (`trust.md` + `trust_map.py`), P3 Identity Map (`authz.md` + `hunt.py` dual-session diff), P4 State Map (`state.md` + `kill_chain.py`), P5 Capability & Authority Map (`capability.md` + `capability_registry.py` + `program_fit.py` + `kill_chain.py`). All six `.md` files (five pillar maps + `invariants.md` for contract hunts) are mandatory state under `state/sessions/{target}/maps/`.
+  - **6 Rules:** No map → no hunt; every hypothesis is a map mutation; hunt intersections not endpoints; differential over absolute; automate discovery + manually reason impact; **every finding has a map path** (`Finding → P# → map.md → location`).
+  - **10-step hunt loop:** BUILD MAPS → IDENTIFY GAPS → SELECT INTERSECTION → FORM HYPOTHESIS → MUTATE ONE VARIABLE → OBSERVE DELTA → REFUTE OR ESCALATE → CHAIN CAPABILITIES → VALIDATE IMPACT → REPORT.
+  - **Intersection format for findings:** every finding must be written as `identity × object × state × boundary × interface`, not "an interesting endpoint" — with a concrete `Identity / Object / State / Boundary / Interface` block plus a one-line `Hypothesis`.
+  - **P5 tightened** to own capability + economic/authority impact: "What can this capability create, approve, modify, transfer, withdraw, impersonate, or authorize?" — a capability is only interesting when it crosses a meaningful boundary.
+- **Smart-Contract Track — protocol & economic-state aware** — new `## Smart-Contract Track` in `references/methodology.md` makes contract hunts invariant-centered: a mandatory cross-cutting `maps/invariants.md` artifact (solvency/supply/permission/price invariants), the economic hunt loop (`MAP → INVARIANT → IDENTIFY ASSUMPTION → FIND CONTROLLED VARIABLE → MUTATE → OBSERVE → CHECK INVARIANT → CHAIN → CALCULATE VALUE AT RISK`), the 8-dimensional Web3 intersection formula (`IDENTITY × ASSET × STATE × PRICE × AUTHORITY × TRUST BOUNDARY × CALL GRAPH × TIME`), and the 12-point protocol-mapping model (external contracts as trust boundaries, economic state machines + value-flow maps, flash-loan-as-capability, privilege graphs, accounting-before-implementation, auto first-depositor hypothesis). `smart-contract-agent.md` now hunts invariants first; FINDINGs carry `invariant` + `value_at_risk`.
+
+### Changed
+- `SKILL.md`: replaced the flat 23-item CRITICAL RULES list with a compact `PILLARS & RULES` section (5 pillars + 6 rules + operating constraints). `methodology.md` added to the always-loaded reference set. New `Turn 1.75 — Build the 5 Maps` orchestration step before agent spawn.
+- **Removed all token-saving constraints — "go all out":** deleted the CONTEXT BUDGET rule and its threshold table, mode-gated loading, the "Do NOT load these" list, source.md 3,000-line truncation, agent/reference caps (max 4 ref files, max 10 agents), CWE section-loading (now the full 1,047-CWE file), SIS-MD skip-for-contract-audit gates, and isolation-check skip thresholds. Turn 2 now loads everything.
+- `references/hacking-agents/shared-rules.md`: FINDING output now carries `map_path` + `intersection` (Identity/Object/State/Boundary/Interface) + `hypothesis`; LEAD output carries `map_path`.
+
+---
+
+## v3.2.3 (2026-08-14)
+
+### Added
+- **DEFAULT CORE MODE — six always-on attackers** (expanded from DEFAULT ROGUE MODE): `rogue-agent`, `counter-intelligence-agent`, `credential-leak-agent`, `access-control-agent`, `business-logic-agent`, and `race-condition-agent` are now spawned in EVERY hunt, every turn — their bundles are never skipped in Turn 2/3, and their CWE sections are always loaded (Turn 2.5). Domain agents (web-api, smart-contract, recon, etc.) are added on top by target type. Per-turn agent cap raised 8 → 10 (6 core + up to 4 domain). The core keeps hunting when domain agents return zero findings, and all core leads chain onto domain findings before reporting.
+- **WILD MODE — Cheat-System Doctrine (default hunting behavior)** — new `references/wild-mode.md`, always loaded, shifts the skill from "reviewer" to "cheater" mindset:
+  - **Payload-first lobbying:** every LEAD now carries a mandatory `payload:` + `probe_results:` + `chain_partners:` field (updated `shared-rules.md` output format). No lead is written without firing a weapon at it.
+  - **No ceilings in the hunt phase:** gates (7-Question Gate, Al-Mizaan, 4-gate judging, "always rejected" lists) are explicitly report-phase filters only. A gate-killed finding is demoted to a lead with its payload and chain partners — never deleted, retested next pass.
+  - **System social engineering:** deception table (identity / authority / state / time / perception / cost / composability lies) plus the 8 Cheat Questions run on every feature, in `references/wild-mode.md` Rules 3-4.
+  - **Cheat-the-Engine sections** added to `web-api-agent.md` and `smart-contract-agent.md` — each agent now starts by enumerating the lies its target's engine can be made to believe before running its attack plan.
+
+### Changed
+- `SKILL.md`: WILD MODE doctrine wired in after CRITICAL RULES; `wild-mode.md` added to always-loaded reference set; 7-Question Gate and ALWAYS REJECTED sections annotated so report-time strictness never leaks into the hunt. Judging gates now demote-with-payload instead of discarding.
+- `references/judging.md`: preamble declaring gates report-phase-only; Gate 1 refutation requires a fired payload before "speculative" kills are allowed.
+
+---
+
+## v3.2.2 (2026-08-14)
+
+### Added
+- **Smart Contract 5-Layer Reasoning** — new directive section in PHASE 4 applying to ALL contract hunting: (1) deployment config over contract code — oracle/rate-provider targets, decimal mismatches, unrenounced ownership, shared accountants; needs live addresses + mainnet RPC, (2) fork mainnet + invariant fuzzers (`totalAssets() == Σ(getRate())`, share-price monotonicity, first-depositor/donation inflation), (3) integration layer — stETH/rebasing/FoT/decimals quirks, read-only reentrancy, (4) chase new deployments/upgrades before scope updates, (5) chain a medium into a critical. Includes "the uncomfortable truth": sound audited code means the critical lives at Layers 1-2, requiring chain access, not more file reads.
+
+---
+
+## v3.2.1 (2026-08-13)
+
+### Added
+- **Counter-Patterns (anti-refutation rules)** baked into the Smart Contract 7-Question Gate track and Al-Mizaan deep gates, sourced from real gate misses:
+  - Gate 1: "documented" / "matches upstream design" is no longer an automatic refutation — refutations require actually reading the upstream source (Camelot xGRAIL cited without seeing Camelot's source = miss, not defense)
+  - Gate 2: rejecting on "requires oracle misreport" now forces a check for an honest-path route to the same state (Lido `onchainTotalValueOnRefSlot`)
+  - Gate 3: front-running a public state transition (xSilo `totalSupply → 0`) is now explicitly attacker-triggerable, not "requires the exiting holder's cooperation"
+  - Gate 4: split self-harm into actor-scoped legs — the exiter's penalty loss and the front-runner's captured residual are evaluated against separate victims
+  - Severity: "transient DoS" requires a confirmed self-resolving recovery path, else score as permanent DoS
+
+---
+
+## v3.2.0 (2026-08-13)
+
+### Added
+- **Smart Contract 7-Question Gate track** — new `⛓️ 7-Question Gate — Smart Contract Track` in PHASE 4 for `--solidity` / `--move` / `--solana` findings. Reframes the gate in protocol-native terms: forge PoC instead of HTTP request, attacker-not-intended-actor instead of "real user", quantified funds/invariant instead of PII/ATO/RCE, Immunefi/Sherlock/audit-history dedup, and a contract always-rejected list (trusted-actor-only, unreachable code, dust profit). Al-Mizaan deep gates are now optional for findings that pass the SC track.
+- **DEFAULT ROGUE MODE** — `rogue-agent` is now spawned in EVERY hunt by default (no longer a zero-findings last resort). Its bundle is never skipped in Turn 2/3. Orchestrator adopts the rogue mindset for the whole hunt: question assumptions, attack developer workflow, weaponize target features, chain rogue leads onto standard findings. See `references/hacking-agents/rogue-agent.md`.
+
+### Changed
+- **Recon tooling** — `subfinder` replaced with `subfaster` in SKILL.md recon pipeline and `tools/recon_engine.sh` (with legacy subfinder fallback).
+
+### Fixed
+- Removed last-resort framing from rogue-agent description so it actually runs on every hunt instead of only after standard agents return zero findings.
+
+---
+
+## v3.1.0 (2026-08-11)
+
+### Added
+- **Al-Mizaan v3 Deep Validation Gates** — 7-gate deep validation framework for borderline or complex findings, integrated from [Bug Bounty Intelligence MCP](https://github.com/holistis/bug-bounty-intelligence-mcp) by holistis. The Al-Mizaan gates (Code Reading → Reachability → Threat Model → Invariant Breach → Protocol Intent → Impact → Formal Proof) complement the existing 7-Question Gate as a deep-validation layer. See `references/al-mizaan-gates.md`.
+- **SIS-MD Passive Intelligence Integration** — Three passive analysis modules (Metadata Intelligence, Secret & Sensitive Data Detection, Technology Fingerprinting) integrated from [SIS-MD Security Intelligence SkillMD](https://github.com/prize22/SIS-MD-Security-Intelligence-SkillMD-) by prize22. Added as a pre-hunt "Turn 1.5" step in the orchestration pipeline. See `references/sis-intelligence.md`.
+- **Agent Isolation System** — New agent boundary enforcement with domain isolation (Owns/Queries/Never Touches), scope compliance, execution permission levels, data integrity, and context safety checks. See `references/isolation.md`.
+- **Agent Isolation Checker Tool** — `tools/agent_isolation.py` with `AgentIsolationChecker` class and CLI for verifying agent findings stay within defined boundaries. Integrated into the Turn 4 tool pipeline.
+- **Bug Bounty Intelligence MCP Integration** — Full MCP server setup guide, tool reference, and embedded CC0 vulnerability acceptance rates (12 patterns, 1,032 findings, 10 contests). See `references/bug-bounty-intelligence-mcp.md`.
+- **CWE Knowledge Base** — ~550 unique CWEs (~1,000 entries with cross-domain references) with detection patterns, severity levels, real-world impacts, and concrete detection toolkits (fuzzing harnesses, grep patterns, curl commands, TLS/PRNG/business-logic testing methodology). Organized across 16 BountyForge agent domains. Includes `shared-rules.md` CWE↔bug_class mapping table so every agent finding is auto-tagged with the correct CWE ID. Integrated into orchestration pipeline via Turn 2.5 (load relevant CWE domain section per spawned agent). See `references/cwe-knowledge-base.md`.
+- **Collaboration credits** section in README.md acknowledging both integrated projects.
+
+### Changed
+- **Enhanced 7-Question Gate** — Q1 now explicitly requires working test case (not just HTTP request), Q3 requires impact quantification. Added Al-Mizaan deep validation as a secondary layer for complex findings.
+- **Orchestration pipeline** — Turn 1 now detects MCP availability for smart contract audits. Turn 1.5 added for passive intelligence gathering (SIS-MD). Turn 2 mode-gated loading. Turn 4 pipeline now includes agent isolation check before chain building and triage.
+- **README Structure section** updated with new reference files and tools.
+- **SKILL.md RESOURCES section** now includes integrated projects and collaboration references.
+
+### Fixed
+- Scope awareness: agents now explicitly exclude `lib/`, `interfaces/`, `mocks/`, `test/` directories from smart contract scans (lesson from Slither benchmark: 89% of false positives were out-of-scope dependency noise).
+
+---
+
+## v3.0.0 (2026-07)
+
+### Added
+- Trust & Verification tool suite: `trust_map.py`, `refutation.py`, `capability_registry.py`, `program_fit.py`, `ledger.py`
+- bountyforge.xyz cloud pentesting tool promotion
+- Firecracker microVM isolation documentation
+
+### Changed
+- 9 new specialist agents
+- Flexible PoC execution rules
+- Agent selection table expanded to 16+ agents
+
+---
+
+## v2.1.0 (2026-06)
+
+### Added
+- 9 new specialist agents
+- Flexible PoC execution rules — agents can probe outside their domain
+
+### Changed
+- Agent communication protocol v2.1 with BROADCAST signal types
+- Shared rules updated with canonical bug class list
+
+---
+
+## v2.0.0 (2026-05)
+
+### Added
+- Complete rewrite of orchestration system
+- Agent bus (`tools/agent_bus.py`)
+- Fleet management (`tools/fleet.py`)
+- Kill chain builder (23 H100-proven chains)
+- Adversary emulation with MITRE/OWASP coverage mapping
+- Supervisor triage system (`references/supervisor.md`)
+
+### Changed
+- Moved all references to root-level `references/` directory
+- Restructured agent definitions into individual files
+
+---
+
+## v1.1.0 (2026-04)
+
+### Added
+- Initial public release
+- 8 core agents (Web/API, Smart Contract, Access Control, Business Logic, Crypto/Math, Race Conditions, Economic Security, Recon)
+- 4-gate evaluation: Refutation → Reachability → Trigger → Impact
+- CVSS 3.1 scoring guide
+- Report formatting templates for H1, Bugcrowd, Intigriti, Immunefi
+- Deepseek Pro setup configuration
+- Local tooling orchestration
