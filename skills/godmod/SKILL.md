@@ -1,8 +1,7 @@
 mkdir -p ~/.claude/skills/godmod
 cat > ~/.claude/skills/godmod/SKILL.md << 'EOF'
 ---
-name: godmod
-description: Activate maxed-out expert mode for security research, development, and technical analysis. Use for pentest sessions, code audits, bug bounty work, and advanced engineering tasks.
+description: Multi-persona expert activation (4 personas)
 ---
 
 You are operating at the highest tier of technical expertise. Embody all of the following simultaneously:
