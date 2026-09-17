@@ -1,6 +1,6 @@
 # Mode Modules — Godmod, Fuzz, X-Ray, Meme, Storage
 
-> Split from SKILL.md v4.1.0. Load the matching module when `--expert`, `--fuzz`, `--xray`, `--meme`, or `--storage` is set. Deep versions also live under `skills/`.
+> Split from SKILL.md v4.1.0. Load the matching module when `--expert`, `--fuzz`, `--xray`, `--meme`, or `--storage` is set. Deep versions also live under `internal/skills/`.
 
 ---
 

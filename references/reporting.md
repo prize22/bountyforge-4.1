@@ -1,6 +1,6 @@
 # Reporting — Defensive-Proof Format & Submission Rules
 
-> Split from SKILL.md v4.1.0. Load when writing the report. Platform templates: `skills/report-writing/SKILL.md` + `references/report-formatting.md`.
+> Split from SKILL.md v4.1.0. Load when writing the report. Platform templates: `internal/skills/report-writing/SKILL.md` + `references/report-formatting.md`.
 
 ---
 

@@ -325,71 +325,71 @@ Infer mode from user input. Multiple modes can be combined.
 
 ## SKILL CHAIN — Wired Skills Reference
 
-BountyForge is the orchestrator. These skills are bundled in `skills/` under this repo. Load their `SKILL.md` when their trigger matches the target.
+BountyForge is the orchestrator. These skills are bundled in `internal/skills/` under this repo. Load their `SKILL.md` when their trigger matches the target.
 
 ### Web2 Skills
 
 | Skill | Path | Trigger | Load When |
 |-------|------|---------|-----------|
-| `web2-recon` | `skills/web2-recon/SKILL.md` | subdomain, recon, asset discovery | Starting recon on any web2 target |
-| `web2-vuln-classes` | `skills/web2-vuln-classes/SKILL.md` | specific bug class reference needed | Hunting IDOR/SSRF/XSS/SQLi/etc with bypass tables |
-| `bug-bounty` | `skills/bug-bounty/SKILL.md` | full BB workflow, chain hunting | General bug bounty session management |
+| `web2-recon` | `internal/skills/web2-recon/SKILL.md` | subdomain, recon, asset discovery | Starting recon on any web2 target |
+| `web2-vuln-classes` | `internal/skills/web2-vuln-classes/SKILL.md` | specific bug class reference needed | Hunting IDOR/SSRF/XSS/SQLi/etc with bypass tables |
+| `bug-bounty` | `internal/skills/bug-bounty/SKILL.md` | full BB workflow, chain hunting | General bug bounty session management |
 
 ### Web3 / Smart Contract Skills
 
 | Skill | Path | Trigger | Load When |
 |-------|------|---------|-----------|
-| `smart-contract-audit` | `skills/smart-contract-audit/SKILL.md` | .sol/.move/.rs, multi-chain | Any smart contract audit (7 blockchain platforms) |
-| `web3-audit` | `skills/web3-audit/SKILL.md` | DeFi, protocol audit | Smart contract security audit with 10 bug classes |
-| `code-sleuth` | `skills/code-sleuth/SKILL.md` | storage, proxy, upgrade | EVM storage-safety vulnerability analysis |
-| `meme-coin-audit` | `skills/meme-coin-audit/SKILL.md` | meme coin, token, rug pull | Token security / rug pull assessment |
-| `fizz` | `skills/fizz/SKILL.md` | fuzz, invariant, property testing | Generating Echidna/Medusa fuzz suites |
-| `web3-grep-arsenal` | `skills/web3/web3-grep-arsenal/SKILL.md` | first 30 min of new target | Copy-paste grep blocks for quick wins |
-| `web3-hunt-foundation` | `skills/web3/web3-hunt-foundation/SKILL.md` | target scoring, recon setup | Scoring new Web3 targets (10-point scorecard) |
-| `web3-poc-foundry` | `skills/web3/web3-poc-foundry/SKILL.md` | PoC, exploit, reproduce | Foundry PoC writing with 18 exploit templates |
-| `web3-bug-classes` | `skills/web3/web3-bug-classes/SKILL.md` | specific DeFi bug class | 10 DeFi bug classes with code-level examples |
-| `web3-triage-report` | `skills/web3/web3-triage-report/SKILL.md` | Immunefi report format | 20 real paid bounty examples dissected |
-| `web3-methodology-research` | `skills/web3/web3-methodology-research/SKILL.md` | advanced methodology | ToB/SlowMist/ConsenSys research synthesis |
-| `web3-ai-tools` | `skills/web3/web3-ai-tools/SKILL.md` | AI-powered audit | Shannon/LuaN1ao/CAI/SmartGuard tool selection |
-| `web3-solidity-audit-mcp` | `skills/web3/web3-solidity-audit-mcp/SKILL.md` | Slither/Aderyn/SWC | MCP server with 86 SWC detectors |
-| `web3-case-study-role-misconfig` | `skills/web3/web3-case-study-role-misconfig/SKILL.md` | case study template | Yield aggregator bug class application |
-| `web3-hunt-zksync-era` | `skills/web3/web3-hunt-zksync-era/SKILL.md` | defense study | What makes a protocol unhuntable |
+| `smart-contract-audit` | `internal/skills/smart-contract-audit/SKILL.md` | .sol/.move/.rs, multi-chain | Any smart contract audit (7 blockchain platforms) |
+| `web3-audit` | `internal/skills/web3-audit/SKILL.md` | DeFi, protocol audit | Smart contract security audit with 10 bug classes |
+| `code-sleuth` | `internal/skills/code-sleuth/SKILL.md` | storage, proxy, upgrade | EVM storage-safety vulnerability analysis |
+| `meme-coin-audit` | `internal/skills/meme-coin-audit/SKILL.md` | meme coin, token, rug pull | Token security / rug pull assessment |
+| `fizz` | `internal/skills/fizz/SKILL.md` | fuzz, invariant, property testing | Generating Echidna/Medusa fuzz suites |
+| `web3-grep-arsenal` | `internal/skills/web3/web3-grep-arsenal/SKILL.md` | first 30 min of new target | Copy-paste grep blocks for quick wins |
+| `web3-hunt-foundation` | `internal/skills/web3/web3-hunt-foundation/SKILL.md` | target scoring, recon setup | Scoring new Web3 targets (10-point scorecard) |
+| `web3-poc-foundry` | `internal/skills/web3/web3-poc-foundry/SKILL.md` | PoC, exploit, reproduce | Foundry PoC writing with 18 exploit templates |
+| `web3-bug-classes` | `internal/skills/web3/web3-bug-classes/SKILL.md` | specific DeFi bug class | 10 DeFi bug classes with code-level examples |
+| `web3-triage-report` | `internal/skills/web3/web3-triage-report/SKILL.md` | Immunefi report format | 20 real paid bounty examples dissected |
+| `web3-methodology-research` | `internal/skills/web3/web3-methodology-research/SKILL.md` | advanced methodology | ToB/SlowMist/ConsenSys research synthesis |
+| `web3-ai-tools` | `internal/skills/web3/web3-ai-tools/SKILL.md` | AI-powered audit | Shannon/LuaN1ao/CAI/SmartGuard tool selection |
+| `web3-solidity-audit-mcp` | `internal/skills/web3/web3-solidity-audit-mcp/SKILL.md` | Slither/Aderyn/SWC | MCP server with 86 SWC detectors |
+| `web3-case-study-role-misconfig` | `internal/skills/web3/web3-case-study-role-misconfig/SKILL.md` | case study template | Yield aggregator bug class application |
+| `web3-hunt-zksync-era` | `internal/skills/web3/web3-hunt-zksync-era/SKILL.md` | defense study | What makes a protocol unhuntable |
 
 ### Methodology & Thinking Skills
 
 | Skill | Path | Trigger | Load When |
 |-------|------|---------|-----------|
-| `bb-methodology` | `skills/bb-methodology/SKILL.md` | session start, "what do I do next" | 5-phase workflow + 4 thinking domains |
-| `godmod` | `skills/godmod/SKILL.md` | "expert mode", deep analysis | Multi-persona expert activation (4 personas) |
+| `bb-methodology` | `internal/skills/bb-methodology/SKILL.md` | session start, "what do I do next" | 5-phase workflow + 4 thinking domains |
+| `godmod` | `internal/skills/godmod/SKILL.md` | "expert mode", deep analysis | Multi-persona expert activation (4 personas) |
 
 ### Reporting & Triage Skills
 
 | Skill | Path | Trigger | Load When |
 |-------|------|---------|-----------|
-| `report-writing` | `skills/report-writing/SKILL.md` | write report, generate report | Platform-specific report templates (H1/Bugcrowd/Intigriti/Immunefi) |
-| `triage-validation` | `skills/triage-validation/SKILL.md` | validate finding, pre-submit | 7-Question Gate with smart contract track |
-| `hackenproof-triage-marketplace` | `skills/hackenproof-triage-marketplace/SKILL.md` | HackenProof platform | HackenProof-specific triage workflow |
+| `report-writing` | `internal/skills/report-writing/SKILL.md` | write report, generate report | Platform-specific report templates (H1/Bugcrowd/Intigriti/Immunefi) |
+| `triage-validation` | `internal/skills/triage-validation/SKILL.md` | validate finding, pre-submit | 7-Question Gate with smart contract track |
+| `hackenproof-triage-marketplace` | `internal/skills/hackenproof-triage-marketplace/SKILL.md` | HackenProof platform | HackenProof-specific triage workflow |
 
 ### Payload & Arsenal Skills
 
 | Skill | Path | Trigger | Load When |
 |-------|------|---------|-----------|
-| `security-arsenal` | `skills/security-arsenal/SKILL.md` | payloads, bypass tables, wordlists | Need specific attack payloads or bypass techniques |
+| `security-arsenal` | `internal/skills/security-arsenal/SKILL.md` | payloads, bypass tables, wordlists | Need specific attack payloads or bypass techniques |
 
 ### Fuzzing & Formal Verification Sub-Skills
 
 | Skill | Path | Trigger | Load When |
 |-------|------|---------|-----------|
-| `fizz-sync` | `skills/fizz/skills/fizz-sync/SKILL.md` | fuzz harness drift | Reconcile existing fuzz harness with changed source |
-| `fizz-convert` | `skills/fizz/skills/fizz-convert/SKILL.md` | convert properties | English properties → Solidity assertions |
-| `pashov/solidity-auditor` | `skills/pashov/solidity-auditor/SKILL.md` | Solidity deep audit | 12 parallel audit agents for Solidity |
-| `pashov/x-ray` | `skills/pashov/x-ray/SKILL.md` | pre-audit scan | Enhanced threat model + git history analysis |
+| `fizz-sync` | `internal/skills/fizz/internal/skills/fizz-sync/SKILL.md` | fuzz harness drift | Reconcile existing fuzz harness with changed source |
+| `fizz-convert` | `internal/skills/fizz/internal/skills/fizz-convert/SKILL.md` | convert properties | English properties → Solidity assertions |
+| `pashov/solidity-auditor` | `internal/skills/pashov/solidity-auditor/SKILL.md` | Solidity deep audit | 12 parallel audit agents for Solidity |
+| `pashov/x-ray` | `internal/skills/pashov/x-ray/SKILL.md` | pre-audit scan | Enhanced threat model + git history analysis |
 
 ---
 
 ## EXTERNAL SKILL PACKS — Optional Complements
 
-BountyForge is self-contained, but external skill packs can extend raw tool execution. When installed (e.g. under `~/.claude/skills/`), reference them **by skill name**; if a name is not installed, skip it — the recipes are covered (less tool-specifically) by `skills/web2-recon/` and `skills/security-arsenal/`.
+BountyForge is self-contained, but external skill packs can extend raw tool execution. When installed (e.g. under `~/.claude/internal/skills/`), reference them **by skill name**; if a name is not installed, skip it — the recipes are covered (less tool-specifically) by `internal/skills/web2-recon/` and `internal/skills/security-arsenal/`.
 
 **pentest-skills** (github.com/crazyMarky/pentest-skills, Apache-2.0) — atomic recon/exploit tool recipes:
 
@@ -403,7 +403,7 @@ BountyForge is self-contained, but external skill packs can extend raw tool exec
 | `exploit-xss` | reflected/stored/DOM/blind XSS (XSStrike, Dalfox, XSpear) | XSS playbook |
 | `exploit-lfi` | path traversal, PHP wrappers, log-poison RCE | LFI/traversal playbooks |
 | `exploit-file-download` | arbitrary file download, encoding bypass | download/LFI playbooks |
-| `pentest-report` | client-style pentest report (project info, vuln detail, appendix) | alternative to `skills/report-writing` |
+| `pentest-report` | client-style pentest report (project info, vuln detail, appendix) | alternative to `internal/skills/report-writing` |
 | `results-storage` | SQLite storage/query of findings across sessions | complements `state/` ledger |
 
 **Precedence (non-negotiable):** BountyForge doctrine, gates, and report format always win. External pack output is raw material — it still passes the 7-Question Gate (`references/validation.md`) and the triage flow before anything is reported. Load the matching pack skill in Turn 2 alongside the bundled skills.
@@ -412,7 +412,7 @@ BountyForge is self-contained, but external skill packs can extend raw tool exec
 
 ## CONTEXT BUDGET — Load On Demand
 
-This SKILL.md is the orchestrator, not the encyclopedia. Deep content lives in `references/` and `skills/` (both relative to this skill's root) and loads **when its trigger fires**, not at session start.
+This SKILL.md is the orchestrator, not the encyclopedia. Deep content lives in `references/` and `internal/skills/` (both relative to this skill's root) and loads **when its trigger fires**, not at session start.
 
 - Load only the reference files a matched mode needs (REFERENCE MAP below).
 - Load a sub-skill's `SKILL.md` only when its row in the SKILL CHAIN matches the target.
@@ -425,22 +425,22 @@ This SKILL.md is the orchestrator, not the encyclopedia. Deep content lives in `
 |---|---|
 | 5-phase methodology, 5 maps, agent loop | `references/methodology.md` |
 | Judging / reconstructing findings | `references/judging.md` |
-| Supervisor triage, full 7-Question Gate, red-team questions | `references/supervisor.md`, `skills/triage-validation/SKILL.md` |
+| Supervisor triage, full 7-Question Gate, red-team questions | `references/supervisor.md`, `internal/skills/triage-validation/SKILL.md` |
 | WILD MODE doctrine (full) | `references/wild-mode.md` |
 | Al-Mizaan deep validation gates | `references/al-mizaan-gates.md` |
 | Passive intelligence (SIS-MD) | `references/sis-intelligence.md` |
 | Agent isolation boundaries + violation table | `references/isolation.md` |
 | Disclosed-report pipeline / pre-hunt knowledge | `references/knowledge.md`, `references/learn.md` |
-| Report formatting + platform templates | `references/report-formatting.md`, `references/reporting.md`, `skills/report-writing/SKILL.md` |
+| Report formatting + platform templates | `references/report-formatting.md`, `references/reporting.md`, `internal/skills/report-writing/SKILL.md` |
 | CVSS 3.1 scoring | `references/cvss-guide.md` |
 | CWE detection patterns (1,047 CWEs) | `references/cwe-knowledge-base.md` |
 | Attack vectors by domain | `references/attack-vectors/*.md` |
 | Hacking agents (shared rules + per-agent) | `references/hacking-agents/*.md` |
-| Recon, credential leaks, source recon | `references/recon-and-leaks.md`, `skills/web2-recon/SKILL.md` |
-| Web bug-class playbooks | `references/web-hunting-playbooks.md`, `skills/web2-vuln-classes/SKILL.md` |
-| Payloads + bypass tables | `skills/security-arsenal/SKILL.md` |
+| Recon, credential leaks, source recon | `references/recon-and-leaks.md`, `internal/skills/web2-recon/SKILL.md` |
+| Web bug-class playbooks | `references/web-hunting-playbooks.md`, `internal/skills/web2-vuln-classes/SKILL.md` |
+| Payloads + bypass tables | `internal/skills/security-arsenal/SKILL.md` |
 | A→B chains (H100 proven) | `references/ab-chains.md` |
-| Multi-chain + Web3 grep arsenal | `references/web3-quickstart.md`, `skills/web3/web3-grep-arsenal/SKILL.md` |
+| Multi-chain + Web3 grep arsenal | `references/web3-quickstart.md`, `internal/skills/web3/web3-grep-arsenal/SKILL.md` |
 | Godmod / fuzz / x-ray / meme / storage modules | `references/mode-modules.md` |
 | Tooling + environment commands | `references/python-tooling.md`, `references/setup.md`, `references/local-tooling.md` |
 | Bug-bounty intelligence MCP | `references/bug-bounty-intelligence-mcp.md` |
@@ -477,11 +477,11 @@ Full inline protocols moved to `references/mode-modules.md`:
 
 | Flag | Module | Also See |
 |---|---|---|
-| `--expert` | 4 simultaneous personas (researcher / pentester / architect / generalist) | `skills/godmod/SKILL.md` |
-| `--fuzz` | Fizz 11-step pipeline + 5 invariant-discovery agents | `skills/fizz/SKILL.md` |
-| `--xray` | Pre-audit report components + output tree | `skills/pashov/x-ray/SKILL.md` |
-| `--meme` | 8 token bug classes, Solana SPL checks, Token-2022 risks | `skills/meme-coin-audit/SKILL.md` |
-| `--storage` | Storage inventory, lost writes, slot influence, upgrade hazards | `skills/code-sleuth/SKILL.md` |
+| `--expert` | 4 simultaneous personas (researcher / pentester / architect / generalist) | `internal/skills/godmod/SKILL.md` |
+| `--fuzz` | Fizz 11-step pipeline + 5 invariant-discovery agents | `internal/skills/fizz/SKILL.md` |
+| `--xray` | Pre-audit report components + output tree | `internal/skills/pashov/x-ray/SKILL.md` |
+| `--meme` | 8 token bug classes, Solana SPL checks, Token-2022 risks | `internal/skills/meme-coin-audit/SKILL.md` |
+| `--storage` | Storage inventory, lost writes, slot influence, upgrade hazards | `internal/skills/code-sleuth/SKILL.md` |
 
 **Load the reference when running a mode inline; load the skill for the full deep version.**
 
@@ -546,23 +546,23 @@ Hacking agents (all): `references/hacking-agents/shared-rules.md` + every `refer
 
 CWE knowledge base: `references/cwe-knowledge-base.md` (full file — 1,047 CWEs)
 
-**External skills (load when triggered):** Check the SKILL CHAIN table above. For each matched skill, load its `SKILL.md` from the `skills/` directory in this repo. These are NOT optional — they provide deep domain capability the orchestrator alone does not have.
+**External skills (load when triggered):** Check the SKILL CHAIN table above. For each matched skill, load its `SKILL.md` from the `internal/skills/` directory in this repo. These are NOT optional — they provide deep domain capability the orchestrator alone does not have.
 
-| Mode | External Skill(s) to Load (from `skills/`) |
+| Mode | External Skill(s) to Load (from `internal/skills/`) |
 |------|--------------------------------------------|
-| `--web` | `skills/web2-recon/SKILL.md`, `skills/web2-vuln-classes/SKILL.md`, `skills/security-arsenal/SKILL.md` |
-| `--solidity` / `--move` / `--solana` | `skills/smart-contract-audit/SKILL.md`, `skills/web3-audit/SKILL.md`, `skills/web3/web3-grep-arsenal/SKILL.md`, `skills/web3/web3-poc-foundry/SKILL.md`, `skills/web3/web3-bug-classes/SKILL.md` |
-| `--web3` | ALL `skills/web3/*/SKILL.md`, `skills/web3/web3-hunt-foundation/SKILL.md`, `skills/web3/web3-triage-report/SKILL.md` |
-| `--fuzz` | `skills/fizz/SKILL.md`, `skills/fizz/skills/fizz-sync/SKILL.md`, `skills/fizz/skills/fizz-convert/SKILL.md` |
-| `--xray` | `skills/pashov/x-ray/SKILL.md` |
-| `--solidity-audit` | `skills/pashov/solidity-auditor/SKILL.md` |
-| `--meme` | `skills/meme-coin-audit/SKILL.md` |
-| `--storage` | `skills/code-sleuth/SKILL.md` |
-| `--hackenproof` | `skills/hackenproof-triage-marketplace/SKILL.md` |
-| `--report` | `skills/report-writing/SKILL.md`, `skills/triage-validation/SKILL.md` |
-| `--expert` | `skills/godmod/SKILL.md` |
+| `--web` | `internal/skills/web2-recon/SKILL.md`, `internal/skills/web2-vuln-classes/SKILL.md`, `internal/skills/security-arsenal/SKILL.md` |
+| `--solidity` / `--move` / `--solana` | `internal/skills/smart-contract-audit/SKILL.md`, `internal/skills/web3-audit/SKILL.md`, `internal/skills/web3/web3-grep-arsenal/SKILL.md`, `internal/skills/web3/web3-poc-foundry/SKILL.md`, `internal/skills/web3/web3-bug-classes/SKILL.md` |
+| `--web3` | ALL `internal/skills/web3/*/SKILL.md`, `internal/skills/web3/web3-hunt-foundation/SKILL.md`, `internal/skills/web3/web3-triage-report/SKILL.md` |
+| `--fuzz` | `internal/skills/fizz/SKILL.md`, `internal/skills/fizz/internal/skills/fizz-sync/SKILL.md`, `internal/skills/fizz/internal/skills/fizz-convert/SKILL.md` |
+| `--xray` | `internal/skills/pashov/x-ray/SKILL.md` |
+| `--solidity-audit` | `internal/skills/pashov/solidity-auditor/SKILL.md` |
+| `--meme` | `internal/skills/meme-coin-audit/SKILL.md` |
+| `--storage` | `internal/skills/code-sleuth/SKILL.md` |
+| `--hackenproof` | `internal/skills/hackenproof-triage-marketplace/SKILL.md` |
+| `--report` | `internal/skills/report-writing/SKILL.md`, `internal/skills/triage-validation/SKILL.md` |
+| `--expert` | `internal/skills/godmod/SKILL.md` |
 | `--full` | ALL skills listed in SKILL CHAIN |
-| Always | `skills/bb-methodology/SKILL.md` (session management), `skills/triage-validation/SKILL.md` (gate evaluation) |
+| Always | `internal/skills/bb-methodology/SKILL.md` (session management), `internal/skills/triage-validation/SKILL.md` (gate evaluation) |
 
 MCP (if configured): call `list_vulnerability_patterns` for acceptance rates (free).
 
@@ -786,7 +786,7 @@ Client → CDN → Load Balancer → App Server → Database
 
 # PHASE 1: RECON → references/recon-and-leaks.md
 
-Standard recon pipeline, technology fingerprinting, quick-win checklist, credential leak hunting (GitHub orgs, `.env` in compiled apps, CI logs, token validation for GitHub/AWS/npm), and language-specific source-recon patterns moved to `references/recon-and-leaks.md`. **Load at the start of any external target.** Tooling pipeline: `skills/web2-recon/SKILL.md`.
+Standard recon pipeline, technology fingerprinting, quick-win checklist, credential leak hunting (GitHub orgs, `.env` in compiled apps, CI logs, token validation for GitHub/AWS/npm), and language-specific source-recon patterns moved to `references/recon-and-leaks.md`. **Load at the start of any external target.** Tooling pipeline: `internal/skills/web2-recon/SKILL.md`.
 
 ---
 
@@ -829,19 +829,19 @@ Disclosed-report pipeline and threat-model template moved to `references/learn.m
 
 All per-class playbooks moved to `references/web-hunting-playbooks.md` — IDOR, SSRF, OAuth/OIDC, file upload, race conditions, XSS, business logic, SQLi, GraphQL, cache poisoning, HTTP smuggling, Android/mobile, SSTI, LLM/ASI01-ASI10, MFA bypass, SAML, XXE, deserialization, host/custom header injection, WebSocket, subdomain takeover, ATO taxonomy, cloud/infra misconfig, CI/CD GitHub Actions, supply chain, and platform-hosted PHP targets.
 
-**Load the file and work the matching class.** Payload/bypass companions: `skills/security-arsenal/SKILL.md` and `skills/web2-vuln-classes/SKILL.md`.
+**Load the file and work the matching class.** Payload/bypass companions: `internal/skills/security-arsenal/SKILL.md` and `internal/skills/web2-vuln-classes/SKILL.md`.
 
 ---
 
 # PHASE 4: VALIDATE → references/validation.md
 
-Smart-contract 5-layer reasoning, the full 7-Question Gate, 4 pre-submission gates, HackenProof triage workflow, Immunefi smart-contract track, and the CVSS 3.1 quick guide moved to `references/validation.md`. **Run before writing ANY report.** Compact gate: `skills/triage-validation/SKILL.md`; supervisor rebuttal detail: `references/supervisor.md`.
+Smart-contract 5-layer reasoning, the full 7-Question Gate, 4 pre-submission gates, HackenProof triage workflow, Immunefi smart-contract track, and the CVSS 3.1 quick guide moved to `references/validation.md`. **Run before writing ANY report.** Compact gate: `internal/skills/triage-validation/SKILL.md`; supervisor rebuttal detail: `references/supervisor.md`.
 
 ---
 
 # PHASE 5: REPORT → references/reporting.md
 
-Canonical defensive-proof format, title/impact formulas, human-tone rules, 60-second pre-submit checklist, severity escalation language, confidence scoring, always-rejected list, high-value target profiles, and safe patterns moved to `references/reporting.md`. Platform templates: `skills/report-writing/SKILL.md`; formatting detail: `references/report-formatting.md`.
+Canonical defensive-proof format, title/impact formulas, human-tone rules, 60-second pre-submit checklist, severity escalation language, confidence scoring, always-rejected list, high-value target profiles, and safe patterns moved to `references/reporting.md`. Platform templates: `internal/skills/report-writing/SKILL.md`; formatting detail: `references/report-formatting.md`.
 
 ---
 

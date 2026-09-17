@@ -1,6 +1,6 @@
 # Recon, Credential Leaks & Source Recon
 
-> Split from SKILL.md v4.1.0. Load at hunt start for any external target. Pipeline counterpart: `skills/web2-recon/SKILL.md`.
+> Split from SKILL.md v4.1.0. Load at hunt start for any external target. Pipeline counterpart: `internal/skills/web2-recon/SKILL.md`.
 
 ---
 

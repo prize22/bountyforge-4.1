@@ -1,6 +1,6 @@
 # Validation — Smart-Contract Reasoning, 7-Question Gate, Triage
 
-> Split from SKILL.md v4.1.0. Load before writing ANY report. Compact gate: `skills/triage-validation/SKILL.md`. Supervisor detail: `references/supervisor.md`.
+> Split from SKILL.md v4.1.0. Load before writing ANY report. Compact gate: `internal/skills/triage-validation/SKILL.md`. Supervisor detail: `references/supervisor.md`.
 
 ---
 
