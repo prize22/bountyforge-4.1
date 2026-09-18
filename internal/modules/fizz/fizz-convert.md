@@ -1,5 +1,4 @@
 ---
-name: fizz-convert
 description: Convert English-language properties in PROPERTIES.md (produced by the Fizz skill) into Solidity assertions inside the existing fuzz harness, then flip their checkboxes. Trigger on "fizz-convert", "convert properties", "implement properties from PROPERTIES.md", "convert PROPERTIES.md to Solidity".
 ---
 
