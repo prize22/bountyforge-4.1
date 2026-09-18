@@ -380,10 +380,10 @@ BountyForge is the orchestrator. These skills are bundled in `internal/skills/` 
 
 | Skill | Path | Trigger | Load When |
 |-------|------|---------|-----------|
-| `fizz-sync` | `internal/skills/fizz/internal/skills/fizz-sync/SKILL.md` | fuzz harness drift | Reconcile existing fuzz harness with changed source |
-| `fizz-convert` | `internal/skills/fizz/internal/skills/fizz-convert/SKILL.md` | convert properties | English properties → Solidity assertions |
-| `pashov/solidity-auditor` | `internal/skills/pashov/solidity-auditor/SKILL.md` | Solidity deep audit | 12 parallel audit agents for Solidity |
-| `pashov/x-ray` | `internal/skills/pashov/x-ray/SKILL.md` | pre-audit scan | Enhanced threat model + git history analysis |
+| `fizz-sync` | `internal/modules/fizz/fizz-sync/SKILL.md` | fuzz harness drift | Reconcile existing fuzz harness with changed source |
+| `fizz-convert` | `internal/modules/fizz/fizz-convert/SKILL.md` | convert properties | English properties → Solidity assertions |
+| `pashov/solidity-auditor` | `internal/modules/pashov/solidity-auditor/SKILL.md` | Solidity deep audit | 12 parallel audit agents for Solidity |
+| `pashov/x-ray` | `internal/modules/pashov/x-ray/SKILL.md` | pre-audit scan | Enhanced threat model + git history analysis |
 
 ---
 
@@ -479,7 +479,7 @@ Full inline protocols moved to `references/mode-modules.md`:
 |---|---|---|
 | `--expert` | 4 simultaneous personas (researcher / pentester / architect / generalist) | `internal/skills/godmod/SKILL.md` |
 | `--fuzz` | Fizz 11-step pipeline + 5 invariant-discovery agents | `internal/skills/fizz/SKILL.md` |
-| `--xray` | Pre-audit report components + output tree | `internal/skills/pashov/x-ray/SKILL.md` |
+| `--xray` | Pre-audit report components + output tree | `internal/modules/pashov/x-ray/SKILL.md` |
 | `--meme` | 8 token bug classes, Solana SPL checks, Token-2022 risks | `internal/skills/meme-coin-audit/SKILL.md` |
 | `--storage` | Storage inventory, lost writes, slot influence, upgrade hazards | `internal/skills/code-sleuth/SKILL.md` |
 
@@ -553,9 +553,9 @@ CWE knowledge base: `references/cwe-knowledge-base.md` (full file — 1,047 CWEs
 | `--web` | `internal/skills/web2-recon/SKILL.md`, `internal/skills/web2-vuln-classes/SKILL.md`, `internal/skills/security-arsenal/SKILL.md` |
 | `--solidity` / `--move` / `--solana` | `internal/skills/smart-contract-audit/SKILL.md`, `internal/skills/web3-audit/SKILL.md`, `internal/skills/web3/web3-grep-arsenal/SKILL.md`, `internal/skills/web3/web3-poc-foundry/SKILL.md`, `internal/skills/web3/web3-bug-classes/SKILL.md` |
 | `--web3` | ALL `internal/skills/web3/*/SKILL.md`, `internal/skills/web3/web3-hunt-foundation/SKILL.md`, `internal/skills/web3/web3-triage-report/SKILL.md` |
-| `--fuzz` | `internal/skills/fizz/SKILL.md`, `internal/skills/fizz/internal/skills/fizz-sync/SKILL.md`, `internal/skills/fizz/internal/skills/fizz-convert/SKILL.md` |
-| `--xray` | `internal/skills/pashov/x-ray/SKILL.md` |
-| `--solidity-audit` | `internal/skills/pashov/solidity-auditor/SKILL.md` |
+| `--fuzz` | `internal/skills/fizz/SKILL.md`, `internal/modules/fizz/fizz-sync/SKILL.md`, `internal/modules/fizz/fizz-convert/SKILL.md` |
+| `--xray` | `internal/modules/pashov/x-ray/SKILL.md` |
+| `--solidity-audit` | `internal/modules/pashov/solidity-auditor/SKILL.md` |
 | `--meme` | `internal/skills/meme-coin-audit/SKILL.md` |
 | `--storage` | `internal/skills/code-sleuth/SKILL.md` |
 | `--hackenproof` | `internal/skills/hackenproof-triage-marketplace/SKILL.md` |
